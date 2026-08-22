@@ -53,6 +53,10 @@ public class CreateUserInput {
             this.role = role;
             return this;
         }
+
+        public  CreateUserInput build() {
+            return new CreateUserInput(this);
+        }
     }
 
     public Long getId() {

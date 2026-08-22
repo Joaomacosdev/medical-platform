@@ -20,7 +20,6 @@ public class UserApplicationMapper {
                 .id(user.getId())
                 .userName(user.getUserName())
                 .email(user.getEmail())
-                .password(user.getPassword())
                 .role(user.getRole())
                 .build();
     }

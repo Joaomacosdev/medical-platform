@@ -6,7 +6,6 @@ public class UserOutput {
     private Long id;
     private String userName;
     private String email;
-    private String password;
     private Role role;
 
 
@@ -14,7 +13,6 @@ public class UserOutput {
         this.id = builder.id;
         this.userName = builder.userName;
         this.email = builder.email;
-        this.password = builder.password;
         this.role = builder.role;
     }
 
@@ -26,7 +24,6 @@ public class UserOutput {
         private Long id;
         private String userName;
         private String email;
-        private String password;
         private Role role;
 
         public Builder id(Long id) {
@@ -44,10 +41,7 @@ public class UserOutput {
             return this;
         }
 
-        public Builder password(String password) {
-            this.password = password;
-            return this;
-        }
+
 
         public Builder role(Role role) {
             this.role = role;
@@ -71,9 +65,6 @@ public class UserOutput {
         return email;
     }
 
-    public String getPassword() {
-        return password;
-    }
 
     public Role getRole() {
         return role;

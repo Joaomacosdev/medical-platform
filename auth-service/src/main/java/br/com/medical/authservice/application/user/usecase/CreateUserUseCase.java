@@ -1,9 +1,15 @@
 package br.com.medical.authservice.application.user.usecase;
 
+import br.com.medical.authservice.application.user.dto.CreateUserInput;
+import br.com.medical.authservice.application.user.dto.UserOutput;
+import br.com.medical.authservice.application.user.mapper.UserApplicationMapper;
+import br.com.medical.authservice.domain.user.exception.EmailAlreadyExistsException;
 import br.com.medical.authservice.domain.user.gateways.UserGateway;
 import br.com.medical.authservice.domain.user.entities.User;
 import br.com.medical.authservice.domain.user.exception.UserNotFoundException;
+import org.springframework.stereotype.Service;
 
+@Service
 public class CreateUserUseCase {
 
     private final UserGateway userGateway;
@@ -12,22 +18,16 @@ public class CreateUserUseCase {
         this.userGateway = userGateway;
     }
 
-    public User execute(User userRequest) {
+    public UserOutput execute(CreateUserInput input) throws UserNotFoundException {
 
-        User user = userGateway.findById(userRequest.getId())
-                .orElseThrow(() -> new UserNotFoundException(userRequest.getId()));
-
-        if (!userGateway.existsById(user.getId())) {
-            throw new UserNotFoundException(user.getId());
+        if(userGateway.findByEmail(input.getEmail()).isPresent()){
+            throw new EmailAlreadyExistsException(input.getEmail());
         }
 
-        if (!userGateway.existsByEmail(user.getEmail())) {
-            throw new UserNotFoundException(user.getId());
-        }
+        var user = UserApplicationMapper.toDomain(input);
+        var savedUser = userGateway.save(user);
 
-        userGateway.save(user);
-
-        return user;
+        return UserApplicationMapper.toDto(savedUser);
 
     }
 }
