@@ -8,6 +8,7 @@ import br.com.medical.authservice.presentation.user.requests.UpdatePasswordReque
 import br.com.medical.authservice.presentation.user.requests.UpdateRoleRequest;
 import br.com.medical.authservice.presentation.user.requests.UpdateUserRequest;
 import br.com.medical.authservice.presentation.user.responses.UserResponse;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -42,7 +43,7 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserResponse> createUser(@RequestBody CreateUserRequest createUserRequest) {
+    public ResponseEntity<UserResponse> createUser(@Valid @RequestBody CreateUserRequest createUserRequest) {
         var input = UserPresentationMapper.toInput(createUserRequest);
         var output = createUserUseCase.execute(input);
         var response = UserPresentationMapper.toResponse(output);
@@ -81,7 +82,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<UserResponse> updateUser(@PathVariable Long id, @RequestBody UpdateUserRequest updateUserRequest){
+    public ResponseEntity<UserResponse> updateUser(@PathVariable Long id, @Valid @RequestBody UpdateUserRequest updateUserRequest){
 
         var input = UserPresentationMapper.toInput(updateUserRequest);
         var output = updateProfileUserUseCase.execute(id, input);
@@ -94,7 +95,7 @@ public class UserController {
     @PatchMapping("/{id}/password")
     public ResponseEntity<UserResponse> updateUserPassword(
             @PathVariable Long id,
-            @RequestBody UpdatePasswordRequest updatePasswordRequest){
+            @Valid @RequestBody UpdatePasswordRequest updatePasswordRequest){
 
         var input = UserPresentationMapper.toInput(updatePasswordRequest);
         var output = updatePasswordUserUseCase.execute(id, input);
@@ -105,7 +106,7 @@ public class UserController {
     }
 
     @PatchMapping("/{id}/role")
-    public ResponseEntity<UserResponse> updateUserRole(@PathVariable Long id ,@RequestBody UpdateRoleRequest updateRoleRequest){
+    public ResponseEntity<UserResponse> updateUserRole(@PathVariable Long id ,@Valid @RequestBody UpdateRoleRequest updateRoleRequest){
 
         var input = UserPresentationMapper.toInput(updateRoleRequest);
         var output = updateRoleUserUseCase.execute(id, input);
