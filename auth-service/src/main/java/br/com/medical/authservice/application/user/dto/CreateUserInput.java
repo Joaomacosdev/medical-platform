@@ -54,7 +54,7 @@ public class CreateUserInput {
             return this;
         }
 
-        public  CreateUserInput build() {
+        public CreateUserInput build() {
             return new CreateUserInput(this);
         }
     }

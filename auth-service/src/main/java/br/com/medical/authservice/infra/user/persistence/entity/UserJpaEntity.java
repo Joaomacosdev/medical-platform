@@ -4,7 +4,11 @@ import br.com.medical.authservice.domain.user.enums.Role;
 import jakarta.persistence.*;
 
 @Entity
-@Table(name = "users")
+@Table(name = "users",
+        uniqueConstraints = {
+                @UniqueConstraint(name = "uk_user_email", columnNames = "email")
+        }
+)
 public class UserJpaEntity {
 
     @Id

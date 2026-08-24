@@ -16,6 +16,6 @@ public class ListUserUseCase {
     }
 
     public List<UserOutput> execute(){
-       return userGateway.findAll().stream().map(UserApplicationMapper::toDto).toList();
+       return userGateway.findAll().stream().map(UserApplicationMapper::toOutput).toList();
     }
 }

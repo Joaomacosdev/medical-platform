@@ -19,7 +19,7 @@ public class FindByEmailUserUseCase {
         User user = userGateway.findByEmail(email)
                 .orElseThrow(() -> new InvalidEmailException(email));
 
-        return UserApplicationMapper.toDto(user);
+        return UserApplicationMapper.toOutput(user);
 
     }
 }

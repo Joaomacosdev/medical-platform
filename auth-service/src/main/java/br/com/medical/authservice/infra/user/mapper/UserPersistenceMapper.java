@@ -24,7 +24,7 @@ public class UserPersistenceMapper {
                 .email(entity.getEmail())
                 .password(entity.getPassword())
                 .role(entity.getRole())
-                .active(entity.isActive())
+                .isActive(entity.isActive())
                 .build();
     }
 }

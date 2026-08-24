@@ -23,8 +23,11 @@ public class User {
 
     private User(Builder builder) {
 
+        String normalizedEmail = normalizeEmail(builder.email);
+
+
         validateUserName(builder.userName);
-        validateEmail(builder.email);
+        validateEmail(normalizedEmail);
         validatePassword(builder.password);
         validateRole(builder.role);
 
@@ -74,8 +77,8 @@ public class User {
             return this;
         }
 
-        public Builder active(boolean active) {
-            this.isActive = active;
+        public Builder isActive(boolean isActive) {
+            this.isActive = isActive;
             return this;
         }
 
@@ -117,10 +120,13 @@ public class User {
     }
 
     public void updateProfile(String newUserName, String newEmail) {
+        String normalizedEmail = normalizeEmail(newEmail);
+
         validateUserName(newUserName);
-        validateEmail(newEmail);
+        validateEmail(normalizedEmail);
+
         this.userName = newUserName;
-        this.email = newEmail;
+        this.email = normalizedEmail;
     }
 
     public void changePassword(String newPassword) {
@@ -146,6 +152,10 @@ public class User {
 
             throw new InvalidEmailException(email);
         }
+    }
+
+    private String normalizeEmail(String email) {
+        return email == null ? null : email.trim().toLowerCase();
     }
 
     private void validatePassword(String password) {

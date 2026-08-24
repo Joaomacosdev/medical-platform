@@ -9,7 +9,6 @@ import br.com.medical.authservice.domain.user.entities.User;
 import br.com.medical.authservice.domain.user.exception.UserNotFoundException;
 import org.springframework.stereotype.Service;
 
-@Service
 public class CreateUserUseCase {
 
     private final UserGateway userGateway;
@@ -18,16 +17,16 @@ public class CreateUserUseCase {
         this.userGateway = userGateway;
     }
 
-    public UserOutput execute(CreateUserInput input) throws UserNotFoundException {
+    public UserOutput execute(CreateUserInput input)  {
 
-        if(userGateway.findByEmail(input.getEmail()).isPresent()){
+        if(userGateway.existsByEmail(input.getEmail())){
             throw new EmailAlreadyExistsException(input.getEmail());
         }
 
         var user = UserApplicationMapper.toDomain(input);
         var savedUser = userGateway.save(user);
 
-        return UserApplicationMapper.toDto(savedUser);
+        return UserApplicationMapper.toOutput(savedUser);
 
     }
 }

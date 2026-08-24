@@ -1,8 +1,10 @@
 package br.com.medical.authservice.presentation.user.mapper;
 
-import br.com.medical.authservice.application.user.dto.CreateUserInput;
-import br.com.medical.authservice.application.user.dto.UserOutput;
+import br.com.medical.authservice.application.user.dto.*;
 import br.com.medical.authservice.presentation.user.requests.CreateUserRequest;
+import br.com.medical.authservice.presentation.user.requests.UpdatePasswordRequest;
+import br.com.medical.authservice.presentation.user.requests.UpdateRoleRequest;
+import br.com.medical.authservice.presentation.user.requests.UpdateUserRequest;
 import br.com.medical.authservice.presentation.user.responses.UserResponse;
 import org.springframework.stereotype.Component;
 
@@ -15,6 +17,25 @@ public class UserPresentationMapper {
                 .email(createUserRequest.getEmail())
                 .password(createUserRequest.getPassword())
                 .role(createUserRequest.getRole())
+                .build();
+    }
+
+    public static UpdateUserInput toInput(UpdateUserRequest updateUserRequest) {
+        return UpdateUserInput.builder()
+                .username(updateUserRequest.getUserName())
+                .email(updateUserRequest.getEmail())
+                .build();
+    }
+
+    public static UpdateRoleInput toInput(UpdateRoleRequest updateRoleRequest) {
+        return UpdateRoleInput.builder()
+                .role(updateRoleRequest.getRole())
+                .build();
+    }
+
+    public static UpdatePasswordInput toInput(UpdatePasswordRequest updatePasswordRequest){
+        return UpdatePasswordInput.builder()
+                .password(updatePasswordRequest.getPassword())
                 .build();
     }
 

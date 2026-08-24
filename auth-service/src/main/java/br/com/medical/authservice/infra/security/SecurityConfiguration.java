@@ -29,7 +29,7 @@ public class SecurityConfiguration {
                                 "/auth/login",
                                 "/users"
                         ).permitAll()
-                        .anyRequest().authenticated()
+                        .anyRequest().permitAll()
                 )
                 .build();
     }

@@ -1,24 +1,44 @@
 package br.com.medical.authservice.presentation.user.controllers;
 
-import br.com.medical.authservice.application.user.usecase.CreateUserUseCase;
+import br.com.medical.authservice.application.user.dto.UpdatePasswordInput;
+import br.com.medical.authservice.application.user.usecase.*;
 import br.com.medical.authservice.presentation.user.mapper.UserPresentationMapper;
 import br.com.medical.authservice.presentation.user.requests.CreateUserRequest;
+import br.com.medical.authservice.presentation.user.requests.UpdatePasswordRequest;
+import br.com.medical.authservice.presentation.user.requests.UpdateRoleRequest;
+import br.com.medical.authservice.presentation.user.requests.UpdateUserRequest;
 import br.com.medical.authservice.presentation.user.responses.UserResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/v1/users")
 public class UserController {
 
     private final CreateUserUseCase createUserUseCase;
+    private final FindByIdUserUseCase findByIdUserUseCase;
+    private final FindByEmailUserUseCase findByEmailUserUseCase;
+    private final FindByUserNameUseCase findByUserNameUseCase;
+    private final ListUserUseCase listUserUseCase;
+    private final UpdateProfileUserUseCase updateProfileUserUseCase;
+    private final UpdatePasswordUserUseCase updatePasswordUserUseCase;
+    private final UpdateRoleUserUseCase updateRoleUserUseCase;
 
-    public UserController(CreateUserUseCase createUserUseCase) {
+    private final DeleteByIdUserUseCase deleteByIdUserUseCase;
+
+    public UserController(CreateUserUseCase createUserUseCase, FindByIdUserUseCase findByIdUserUseCase, FindByEmailUserUseCase findByEmailUserUseCase, FindByUserNameUseCase findByUserNameUseCase, ListUserUseCase listUserUseCase, UpdateProfileUserUseCase updateProfileUserUseCase, UpdatePasswordUserUseCase updatePasswordUserUseCase, UpdateRoleUserUseCase updateRoleUserUseCase, DeleteByIdUserUseCase deleteByIdUserUseCase) {
         this.createUserUseCase = createUserUseCase;
+        this.findByIdUserUseCase = findByIdUserUseCase;
+        this.findByEmailUserUseCase = findByEmailUserUseCase;
+        this.findByUserNameUseCase = findByUserNameUseCase;
+        this.listUserUseCase = listUserUseCase;
+        this.updateProfileUserUseCase = updateProfileUserUseCase;
+        this.updatePasswordUserUseCase = updatePasswordUserUseCase;
+        this.updateRoleUserUseCase = updateRoleUserUseCase;
+        this.deleteByIdUserUseCase = deleteByIdUserUseCase;
     }
 
     @PostMapping
@@ -29,4 +49,79 @@ public class UserController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<UserResponse> getUserById(@PathVariable Long id){
+        return ResponseEntity.ok(UserPresentationMapper.toResponse(findByIdUserUseCase.execute(id)));
+    }
+
+    @GetMapping
+    public ResponseEntity<?> getUsers(
+            @RequestParam(required = false) String email,
+            @RequestParam(required = false) String userName) {
+
+        if (email != null) {
+            return ResponseEntity.ok(
+                    UserPresentationMapper.toResponse(findByEmailUserUseCase.execute(email))
+            );
+        }
+
+        if (userName != null) {
+            return ResponseEntity.ok(
+                    UserPresentationMapper.toResponse(findByUserNameUseCase.execute(userName))
+            );
+        }
+
+        var response = listUserUseCase.execute()
+                .stream()
+                .map(UserPresentationMapper::toResponse)
+                .toList();
+
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<UserResponse> updateUser(@PathVariable Long id, @RequestBody UpdateUserRequest updateUserRequest){
+
+        var input = UserPresentationMapper.toInput(updateUserRequest);
+        var output = updateProfileUserUseCase.execute(id, input);
+        var response = UserPresentationMapper.toResponse(output);
+
+        return ResponseEntity.ok(response);
+
+    }
+
+    @PatchMapping("/{id}/password")
+    public ResponseEntity<UserResponse> updateUserPassword(
+            @PathVariable Long id,
+            @RequestBody UpdatePasswordRequest updatePasswordRequest){
+
+        var input = UserPresentationMapper.toInput(updatePasswordRequest);
+        var output = updatePasswordUserUseCase.execute(id, input);
+        var response = UserPresentationMapper.toResponse(output);
+
+        return ResponseEntity.ok(response);
+
+    }
+
+    @PatchMapping("/{id}/role")
+    public ResponseEntity<UserResponse> updateUserRole(@PathVariable Long id ,@RequestBody UpdateRoleRequest updateRoleRequest){
+
+        var input = UserPresentationMapper.toInput(updateRoleRequest);
+        var output = updateRoleUserUseCase.execute(id, input);
+        var response = UserPresentationMapper.toResponse(output);
+
+        return ResponseEntity.ok(response);
+
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUserById(@PathVariable Long id){
+        deleteByIdUserUseCase.execute(id);
+        return ResponseEntity.noContent().build();
+    }
+
+
+
+
 }

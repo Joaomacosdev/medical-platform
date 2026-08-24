@@ -19,7 +19,7 @@ public class FindByUserNameUseCase {
         User user = userGateway.findByUserName(username)
                 .orElseThrow(() -> new InvalidUserNameException(username));
 
-        return UserApplicationMapper.toDto(user);
+        return UserApplicationMapper.toOutput(user);
 
     }
 }
