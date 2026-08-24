@@ -318,4 +318,3 @@ O modulo estara pronto quando:
 - testes unitarios, GraphQL, persistencia, seguranca e mensageria passarem;
 - execucao local for reproduzivel;
 - README e collection contiverem exemplos reais.
-
