@@ -6,13 +6,16 @@ import br.com.medical.authservice.application.user.mapper.UserApplicationMapper;
 import br.com.medical.authservice.domain.user.entities.User;
 import br.com.medical.authservice.domain.user.exception.UserNotFoundException;
 import br.com.medical.authservice.domain.user.gateways.UserGateway;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 public class UpdatePasswordUserUseCase {
 
     private final UserGateway userGateway;
+    private final PasswordEncoder passwordEncoder;
 
-    public UpdatePasswordUserUseCase(UserGateway userGateway) {
+    public UpdatePasswordUserUseCase(UserGateway userGateway, PasswordEncoder passwordEncoder) {
         this.userGateway = userGateway;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public UserOutput execute(Long id, UpdatePasswordInput updatePasswordInput){
@@ -20,11 +23,13 @@ public class UpdatePasswordUserUseCase {
         User user = userGateway.findById(id)
                 .orElseThrow(() -> new UserNotFoundException(id));
 
-        user.changePassword(updatePasswordInput.getPassword());
+        String encodedPassword =
+                passwordEncoder.encode(updatePasswordInput.getPassword());
 
-        User updatedUser = userGateway.save(user);
+        user.changePassword(encodedPassword);
 
-        return UserApplicationMapper.toOutput(updatedUser);
+        var savedUser = userGateway.save(user);
 
+        return UserApplicationMapper.toOutput(savedUser);
     }
 }

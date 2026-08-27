@@ -1,7 +1,7 @@
 package br.com.medical.authservice.presentation.user.controllers;
 
-import br.com.medical.authservice.application.user.dto.UpdatePasswordInput;
 import br.com.medical.authservice.application.user.usecase.*;
+import br.com.medical.authservice.presentation.user.controllers.docs.UserControllerDocs;
 import br.com.medical.authservice.presentation.user.mapper.UserPresentationMapper;
 import br.com.medical.authservice.presentation.user.requests.CreateUserRequest;
 import br.com.medical.authservice.presentation.user.requests.UpdatePasswordRequest;
@@ -13,11 +13,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
-@RequestMapping("/v1/users")
-public class UserController {
+@RequestMapping("/api/users/v1")
+
+public class UserController implements UserControllerDocs {
 
     private final CreateUserUseCase createUserUseCase;
     private final FindByIdUserUseCase findByIdUserUseCase;
@@ -43,6 +42,7 @@ public class UserController {
     }
 
     @PostMapping
+    @Override
     public ResponseEntity<UserResponse> createUser(@Valid @RequestBody CreateUserRequest createUserRequest) {
         var input = UserPresentationMapper.toInput(createUserRequest);
         var output = createUserUseCase.execute(input);
@@ -52,11 +52,13 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
+    @Override
     public ResponseEntity<UserResponse> getUserById(@PathVariable Long id){
         return ResponseEntity.ok(UserPresentationMapper.toResponse(findByIdUserUseCase.execute(id)));
     }
 
     @GetMapping
+    @Override
     public ResponseEntity<?> getUsers(
             @RequestParam(required = false) String email,
             @RequestParam(required = false) String userName) {
@@ -82,6 +84,7 @@ public class UserController {
     }
 
     @PutMapping("/{id}")
+    @Override
     public ResponseEntity<UserResponse> updateUser(@PathVariable Long id, @Valid @RequestBody UpdateUserRequest updateUserRequest){
 
         var input = UserPresentationMapper.toInput(updateUserRequest);
@@ -93,6 +96,7 @@ public class UserController {
     }
 
     @PatchMapping("/{id}/password")
+    @Override
     public ResponseEntity<UserResponse> updateUserPassword(
             @PathVariable Long id,
             @Valid @RequestBody UpdatePasswordRequest updatePasswordRequest){
@@ -106,7 +110,8 @@ public class UserController {
     }
 
     @PatchMapping("/{id}/role")
-    public ResponseEntity<UserResponse> updateUserRole(@PathVariable Long id ,@Valid @RequestBody UpdateRoleRequest updateRoleRequest){
+    @Override
+    public ResponseEntity<UserResponse> updateUserRole(@PathVariable Long id, @Valid @RequestBody UpdateRoleRequest updateRoleRequest){
 
         var input = UserPresentationMapper.toInput(updateRoleRequest);
         var output = updateRoleUserUseCase.execute(id, input);
@@ -117,6 +122,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
+    @Override
     public ResponseEntity<Void> deleteUserById(@PathVariable Long id){
         deleteByIdUserUseCase.execute(id);
         return ResponseEntity.noContent().build();

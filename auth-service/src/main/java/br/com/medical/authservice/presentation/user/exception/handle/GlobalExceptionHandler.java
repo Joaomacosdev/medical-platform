@@ -2,6 +2,7 @@ package br.com.medical.authservice.presentation.user.exception.handle;
 
 import br.com.medical.authservice.domain.user.exception.*;
 import br.com.medical.authservice.presentation.user.exception.ProblemDetailFactory;
+import br.com.medical.authservice.presentation.user.exception.docs.GlobalExceptionHandlerDocs;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
@@ -9,9 +10,10 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
-public class GlobalExceptionHandler {
+public class GlobalExceptionHandler implements GlobalExceptionHandlerDocs {
 
     @ExceptionHandler(UserNotFoundException.class)
+    @Override
     public ProblemDetail handleNotFound(UserNotFoundException ex, HttpServletRequest request) {
         return   ProblemDetailFactory.create(
                 HttpStatus.NOT_FOUND,
@@ -23,6 +25,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(EmailAlreadyExistsException.class)
+    @Override
     public ProblemDetail handleEmailAlreadyExists(
             EmailAlreadyExistsException ex,
             HttpServletRequest request
@@ -37,6 +40,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(InvalidEmailException.class)
+    @Override
     public ProblemDetail handleInvalidEmail(
             InvalidEmailException ex,
             HttpServletRequest request
@@ -51,6 +55,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(InvalidIsActiveExeption.class)
+    @Override
     public ProblemDetail handleInactiveUser(
             InvalidIsActiveExeption ex,
             HttpServletRequest request
@@ -65,6 +70,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(InvalidPasswordException.class)
+    @Override
     public ProblemDetail handleInvalidPassword(
             InvalidPasswordException ex,
             HttpServletRequest request
@@ -79,6 +85,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(InvalidRoleException.class)
+    @Override
     public ProblemDetail handleInvalidRole(
             InvalidRoleException ex,
             HttpServletRequest request
@@ -93,6 +100,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(InvalidUserNameException.class)
+    @Override
     public ProblemDetail handleInvalidUserName(
             InvalidUserNameException ex,
             HttpServletRequest request

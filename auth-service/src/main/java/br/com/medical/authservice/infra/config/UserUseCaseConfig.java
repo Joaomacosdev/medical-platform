@@ -4,6 +4,7 @@ import br.com.medical.authservice.application.user.usecase.*;
 import br.com.medical.authservice.domain.user.gateways.UserGateway;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 public class UserUseCaseConfig {
@@ -44,8 +45,8 @@ public class UserUseCaseConfig {
     }
 
     @Bean
-    public UpdatePasswordUserUseCase updatePasswordUserUseCase(UserGateway userGateway) {
-        return new UpdatePasswordUserUseCase(userGateway);
+    public UpdatePasswordUserUseCase updatePasswordUserUseCase(UserGateway userGateway, PasswordEncoder passwordEncoder) {
+        return new UpdatePasswordUserUseCase(userGateway, passwordEncoder);
     }
 
     @Bean

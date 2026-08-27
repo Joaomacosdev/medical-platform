@@ -15,3 +15,8 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+spring-doc:
+  paths-to-match: /api/**/v1/**
+  swagger-ui:
+    use-root-path: true

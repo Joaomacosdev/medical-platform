@@ -6,12 +6,12 @@ import br.com.medical.authservice.infra.user.mapper.UserPersistenceMapper;
 import br.com.medical.authservice.infra.user.persistence.entity.UserJpaEntity;
 import br.com.medical.authservice.infra.user.persistence.repository.UserJpaRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Optional;
 
-@Service
+@Component
 public class UserJpaAdapter implements UserGateway {
 
     private final UserJpaRepository userJpaRepository;
@@ -29,11 +29,8 @@ public class UserJpaAdapter implements UserGateway {
     public User save(User user) {
         UserJpaEntity entity = mapper.toJpa(user);
 
-        if (user.getId() == null) {
-            entity.setPassword(
-                    passwordEncoder.encode(user.getPassword())
-            );
-        }
+        entity.setPassword(passwordEncoder.encode(user.getPassword()));
+
 
         UserJpaEntity savedEntity = userJpaRepository.save(entity);
         return mapper.toDomain(savedEntity);

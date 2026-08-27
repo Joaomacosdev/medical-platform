@@ -13,6 +13,7 @@ public class CreateUserUseCase {
 
     private final UserGateway userGateway;
 
+
     public CreateUserUseCase(UserGateway userGateway) {
         this.userGateway = userGateway;
     }

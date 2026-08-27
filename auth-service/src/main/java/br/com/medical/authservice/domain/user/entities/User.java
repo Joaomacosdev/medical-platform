@@ -33,7 +33,7 @@ public class User {
 
         this.id = builder.id;
         this.userName = builder.userName;
-        this.email = builder.email;
+        this.email = normalizedEmail;
         this.password = builder.password;
         this.role = builder.role;
         this.isActive = builder.isActive;
