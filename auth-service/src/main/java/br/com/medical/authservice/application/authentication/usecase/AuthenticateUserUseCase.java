@@ -1,0 +1,42 @@
+package br.com.medical.authservice.application.authentication.usecase;
+
+
+import br.com.medical.authservice.application.authentication.dto.AuthenticateUserInput;
+import br.com.medical.authservice.application.authentication.dto.AuthenticationOutput;
+import br.com.medical.authservice.domain.authentication.gatewys.AuthenticationGateway;
+import br.com.medical.authservice.domain.authentication.gatewys.AuthenticationResult;
+import br.com.medical.authservice.domain.authentication.gatewys.TokenGateway;
+
+public class AuthenticateUserUseCase {
+
+    private static final long TOKEN_EXPIRATION_SECONDS = 3600;
+
+    private final AuthenticationGateway authenticationGateway;
+    private final TokenGateway tokenGateway;
+
+    public AuthenticateUserUseCase(AuthenticationGateway authenticationGateway, TokenGateway tokenGateway) {
+        this.authenticationGateway = authenticationGateway;
+        this.tokenGateway = tokenGateway;
+    }
+
+    public AuthenticationOutput execute(AuthenticateUserInput input) {
+
+        AuthenticationResult result = authenticationGateway.authenticate(
+                        input.getEmail(),
+                        input.getPassword()
+                );
+
+        String token = tokenGateway.generate(
+                result.userId(),
+                result.email(),
+                result.role()
+        );
+
+        return AuthenticationOutput.builder()
+                .accessToken(token)
+                .tokenType("Bearer")
+                .expiresIn(TOKEN_EXPIRATION_SECONDS)
+                .build();
+    }
+}
+
