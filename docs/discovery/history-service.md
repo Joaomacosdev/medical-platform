@@ -6,33 +6,38 @@ Mapear o escopo do `history-service` antes da implementacao, reconciliando o enu
 
 Este documento separa:
 
-- **Confirmado**: exigido pela FIAP ou atribuido no Trello;
+- **Confirmado**: exigido pela FIAP ou atribuido diretamente pelo grupo;
 - **Proposta**: desenho tecnico recomendado para discussao;
+- **Condicional**: depende de uma decisao arquitetural ainda nao tomada;
 - **Pendente**: decisao que depende de outro integrante ou do grupo.
 
 ## 2. Fontes e precedencia
 
 1. `ADJT - BB - Tech Challenge - Fase 3.pdf` - fonte normativa.
 2. `Documento_Engenharia_Software_TechChallenge_Fase3 (1).pdf` - especificacao complementar.
-3. Trello `Entrega TC - 3` - distribuicao operacional do grupo.
+3. Conversa com o responsavel pelo repositorio - distribuicao operacional do grupo.
 4. Codigo da branch `main` - estado real implementado.
 
 Em caso de conflito, prevalece o PDF oficial da FIAP.
 
 ## 3. Responsabilidade confirmada
 
-O cartao `[Historico]` esta no Backlog e possui a etiqueta `Vinicius`.
-
-O cartao nao possui descricao, checklist, prazo ou membro formalmente associado. Portanto, a responsabilidade confirmada e o tema **Historico**. O Trello nao atribui a Vinicius toda a autenticacao, toda a mensageria ou o servico de notificacoes.
+A conversa com Joao confirma que Vinicius ficou com **Historico + GraphQL**. O PDF de Engenharia distribui "Seguranca e GraphQL" para um integrante generico, mas nao relaciona os numeros dos integrantes aos nomes da equipe. A distribuicao nominal do grupo e usada para separar as responsabilidades.
 
 Dentro do `history-service`, Vinicius e responsavel por:
 
 - contrato GraphQL do historico;
 - consultas de historico completo e apenas futuro;
-- regras de acesso aplicadas ao historico;
-- modelo de leitura e persistencia do historico, caso o servico separado seja mantido;
-- consumo dos eventos acordados com Agendamento/Mensageria;
+- regras de acesso aplicadas na borda do historico quando a identidade autenticada estiver disponivel;
 - testes e documentacao do proprio modulo.
+
+Sao responsabilidades condicionais, e nao atribuicoes confirmadas:
+
+- persistencia ou banco proprio para o historico;
+- consumo de eventos do Agendamento;
+- implementacao da edicao do historico, pois os campos e o servico proprietario ainda nao foram definidos.
+
+Nao fazem parte do escopo pessoal de Vinicius: implementar o servico de Autenticacao, publicar eventos do Agendamento, escolher/configurar o broker ou enviar notificacoes.
 
 ## 4. Requisitos funcionais confirmados
 
@@ -58,11 +63,11 @@ O enfermeiro pode consultar o historico. O enunciado nao concede ao enfermeiro p
 
 O paciente pode visualizar somente as proprias consultas. O `patientId` recebido do cliente nunca pode permitir que um paciente acesse dados de outro.
 
-### HIS-RF-06 - Refletir criacoes e edicoes
+### HIS-RF-06 - Refletir criacoes e edicoes (condicional)
 
-O historico deve refletir consultas criadas e editadas no Servico de Agendamento.
+Se o `history-service` mantiver uma fonte propria, ela devera refletir consultas criadas e editadas no Servico de Agendamento.
 
-Se a integracao escolhida for assincrona, devem ser processados pelo menos os eventos:
+O enunciado exige mensageria entre Agendamento e Notificacoes, nao entre Agendamento e Historico. Se o grupo tambem escolher integracao assincrona para alimentar o Historico, poderao ser processados eventos como:
 
 - `APPOINTMENT_CREATED`;
 - `APPOINTMENT_UPDATED`.
@@ -71,7 +76,7 @@ Se a integracao escolhida for assincrona, devem ser processados pelo menos os ev
 
 - Spring Boot e Java 21, conforme a stack adotada pelo grupo.
 - GraphQL como contrato de consulta.
-- controle de acesso por `MEDICO`, `ENFERMEIRO` e `PACIENTE`;
+- controle de acesso por `MEDICO`, `ENFERMEIRO` e `PACIENTE` no sistema; a integracao local depende do contrato da Autenticacao;
 - codigo modular, documentado e testavel;
 - instrucoes de configuracao e execucao;
 - exemplos importaveis no Postman ou ferramenta equivalente;
@@ -103,7 +108,7 @@ Dados clinicos, diagnosticos, prescricoes e anotacoes medicas nao devem ser inve
 ```graphql
 type Query {
   appointmentHistory(
-    patientId: ID
+    patientId: ID!
     futureOnly: Boolean! = false
   ): [AppointmentHistoryItem!]!
 }
@@ -114,8 +119,6 @@ type AppointmentHistoryItem {
   doctorId: ID
   scheduledAt: String!
   status: String!
-  createdAt: String!
-  updatedAt: String!
 }
 ```
 
@@ -124,14 +127,15 @@ Regras propostas:
 - `MEDICO` e `ENFERMEIRO`: informam `patientId` obrigatoriamente;
 - `PACIENTE`: o servico deriva a identidade do usuario autenticado e rejeita tentativa de consultar outro paciente;
 - resultado ordenado por `scheduledAt` de forma deterministica;
-- `futureOnly = true`: considerar `scheduledAt > now` no timezone acordado;
+- `scheduledAt`: usar ISO-8601 com offset, por exemplo `2026-09-01T13:00:00-03:00`;
+- `futureOnly = true`: comparar instantes e considerar apenas `scheduledAt > now`;
 - ausencia de registros retorna lista vazia, nunca `null`.
 
 A operacao de edicao pelo medico sera definida separadamente como mutation GraphQL ou endpoint REST depois que os campos editaveis forem aprovados.
 
-## 8. Contrato de evento proposto
+## 8. Contrato de evento condicional
 
-O contrato abaixo deve ser aprovado com Agendamento e Mensageria antes da implementacao do consumidor:
+Este contrato nao faz parte da primeira entrega e so deve ser implementado se o grupo decidir alimentar o Historico por eventos. Nesse caso, deve ser aprovado com Agendamento e Mensageria antes da implementacao do consumidor:
 
 ```json
 {
@@ -174,19 +178,26 @@ Uma chamada remota ao servico de Autenticacao em toda requisicao nao e a opcao r
 
 ## 10. Criterios de aceite
 
-### Consultas GraphQL
+### Primeira entrega - contrato GraphQL
+
+- [x] Aplicacao inicia na porta 8083 sem depender de banco externo.
+- [x] Query `appointmentHistory` recebe `patientId` obrigatorio.
+- [x] `futureOnly = false` retorna todo o historico encontrado.
+- [x] `futureOnly = true` retorna somente `scheduledAt > now`.
+- [x] Ausencia de registros retorna `[]`.
+- [x] Resultado possui ordenacao deterministica.
+- [x] Testes unitarios, GraphQL e de contexto passam.
+
+### Entrega posterior - autorizacao
 
 - [ ] Medico consulta todo o historico de um paciente.
 - [ ] Enfermeiro consulta todo o historico de um paciente.
-- [ ] Filtro `futureOnly` retorna somente `scheduledAt > now`.
 - [ ] Paciente consulta o proprio historico.
 - [ ] Paciente nao acessa historico de outro paciente.
 - [ ] Usuario sem autenticacao recebe resposta de nao autenticado.
 - [ ] Perfil sem permissao recebe resposta de acesso negado.
-- [ ] Lista vazia e retornada como `[]`.
-- [ ] Resultado possui ordenacao deterministica.
 
-### Integracao assincrona
+### Integracao assincrona (condicional)
 
 - [ ] Evento de criacao gera registro no read model.
 - [ ] Evento de edicao atualiza o registro correto.
@@ -213,6 +224,8 @@ Uma chamada remota ao servico de Autenticacao em toda requisicao nao e a opcao r
 
 ### HIS-02 - Fechar o contrato com Agendamento e Mensageria
 
+**Responsabilidade:** equipe/Mensageria; nao bloqueia a primeira entrega do Historico.
+
 - escolher Kafka ou RabbitMQ;
 - aprovar envelope e tipos dos eventos;
 - definir topico/exchange, chave e versao;
@@ -232,9 +245,10 @@ Uma chamada remota ao servico de Autenticacao em toda requisicao nao e a opcao r
 
 - configurar porta 8083;
 - adicionar GraphQL e suporte de testes;
-- configurar persistencia e migration;
 - criar configuracao local sem credenciais versionadas;
 - corrigir o teste de contexto.
+
+Persistencia e migration entram somente depois da decisao de banco/read model proprio.
 
 **Aceite:** aplicacao sobe de forma reproduzivel e testes de contexto passam.
 
@@ -250,6 +264,8 @@ Uma chamada remota ao servico de Autenticacao em toda requisicao nao e a opcao r
 
 ### HIS-06 - Implementar persistencia do read model
 
+**Condicional:** executar somente se a equipe aprovar persistencia propria para o Historico.
+
 - criar entidade de persistencia separada do contrato GraphQL;
 - criar repository;
 - criar migration;
@@ -258,6 +274,8 @@ Uma chamada remota ao servico de Autenticacao em toda requisicao nao e a opcao r
 **Aceite:** testes de integracao comprovam criacao, atualizacao, filtro e ordenacao.
 
 ### HIS-07 - Consumir eventos
+
+**Condicional:** executar somente se a equipe aprovar a integracao Agendamento -> Historico por eventos.
 
 - consumir `APPOINTMENT_CREATED`;
 - consumir `APPOINTMENT_UPDATED`;
@@ -298,23 +316,28 @@ Uma chamada remota ao servico de Autenticacao em toda requisicao nao e a opcao r
 
 | Decisao | Dependencia | Impacto se nao fechar |
 | --- | --- | --- |
-| Kafka ou RabbitMQ | Mensageria/equipe | Nao e possivel implementar o consumidor real |
+| Kafka ou RabbitMQ | Mensageria/equipe | Bloqueia apenas um consumidor condicional; nao bloqueia GraphQL |
 | Forma de propagacao da identidade | Autenticacao/equipe | Nao e possivel garantir roles e isolamento do paciente |
 | Campos e tipos do evento | Agendamento/Mensageria | Read model pode nascer incompativel |
 | Significado e campos editaveis do historico | Equipe/professor | Nao e possivel cumprir com seguranca a edicao pelo medico |
-| Timezone de `futureOnly` | Equipe | Resultados podem divergir entre ambientes |
 | Banco do Historico | Arquitetura/equipe | Persistencia, migration e testes ficam indefinidos |
 
 ## 13. Definicao de pronto do History Service
 
-O modulo estara pronto quando:
+Para a primeira entrega, o modulo estara pronto quando:
 
-- os contratos bloqueantes estiverem documentados;
-- consultas completa e futura funcionarem por GraphQL;
-- permissoes forem aplicadas no caso de uso;
-- paciente nao conseguir consultar outro paciente;
-- criacao e edicao de consulta atualizarem o read model;
-- reentrega nao duplicar efeito;
-- testes unitarios, GraphQL, persistencia, seguranca e mensageria passarem;
-- execucao local for reproduzivel;
-- README e collection contiverem exemplos reais.
+- a aplicacao iniciar na porta 8083;
+- as consultas completa e futura funcionarem por GraphQL;
+- a borda GraphQL nao expuser o modelo de dominio diretamente;
+- testes unitarios, GraphQL e de contexto passarem;
+- o schema e a execucao local estiverem documentados.
+
+Para a entrega final do modulo, ainda sera necessario, conforme os contratos da equipe:
+
+- documentar os contratos bloqueantes;
+- aplicar permissoes no caso de uso;
+- impedir que o paciente consulte outro paciente;
+- integrar a fonte real dos dados;
+- testar persistencia e mensageria, somente se forem adotadas;
+- manter a execucao local reproduzivel;
+- fornecer exemplos reais no README e na collection.
