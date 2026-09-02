@@ -2,6 +2,7 @@ package br.com.medical.authservice.infra.security;
 
 import br.com.medical.authservice.domain.user.entities.User;
 import br.com.medical.authservice.domain.user.enums.Role;
+import org.jspecify.annotations.Nullable;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -10,6 +11,7 @@ import java.util.Collection;
 import java.util.List;
 
 public class CustomUserDetails implements UserDetails {
+
     private final User user;
 
     public CustomUserDetails(User user) {
@@ -19,14 +21,12 @@ public class CustomUserDetails implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(
-                new SimpleGrantedAuthority(
-                        "ROLE_" + user.getRole().name()
-                )
+                new SimpleGrantedAuthority("ROLE_" + user.getRole().name())
         );
     }
 
     @Override
-    public String getPassword() {
+    public @Nullable String getPassword() {
         return user.getPassword();
     }
 
@@ -52,7 +52,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return user.isActive();
+        return true;
     }
 
     public Long getUserId() {

@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
-    private final UserGateway userGateway;
+    private final UserGateway  userGateway;
 
     public CustomUserDetailsService(UserGateway userGateway) {
         this.userGateway = userGateway;
@@ -19,13 +19,8 @@ public class CustomUserDetailsService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         User user = userGateway.findByEmail(email)
-                .orElseThrow(() ->
-                        new UsernameNotFoundException(
-                                "User not found"
-                        )
-                );
+                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         return new CustomUserDetails(user);
-
     }
 }

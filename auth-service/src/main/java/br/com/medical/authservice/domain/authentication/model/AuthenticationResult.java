@@ -1,4 +1,4 @@
-package br.com.medical.authservice.domain.authentication.gatewys;
+package br.com.medical.authservice.domain.authentication.model;
 
 import br.com.medical.authservice.domain.user.enums.Role;
 

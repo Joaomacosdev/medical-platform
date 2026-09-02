@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
-public class GlobalExceptionHandler implements GlobalExceptionHandlerDocs {
+public class GlobalUserExceptionHandler implements GlobalExceptionHandlerDocs {
 
     @ExceptionHandler(UserNotFoundException.class)
     @Override

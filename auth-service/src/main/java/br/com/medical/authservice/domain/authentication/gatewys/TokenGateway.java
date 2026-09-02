@@ -8,4 +8,16 @@ public interface TokenGateway {
             String email,
             Role role
     );
+
+    String generateRefreshToken(
+            Long userId
+    );
+
+    String verify(
+            String token
+    );
+
+    Long getUserIdFromRefreshToken(
+            String refreshToken
+    );
 }

@@ -1,5 +1,6 @@
 package br.com.medical.authservice.presentation.user.controllers.docs;
 
+import br.com.medical.authservice.infra.security.CustomUserDetails;
 import br.com.medical.authservice.presentation.user.requests.CreateUserRequest;
 import br.com.medical.authservice.presentation.user.requests.UpdatePasswordRequest;
 import br.com.medical.authservice.presentation.user.requests.UpdateRoleRequest;
@@ -116,15 +117,14 @@ public interface UserControllerDocs {
                     content = @Content
             )
     })
-    ResponseEntity<UserResponse> getUserById(
+    ResponseEntity<UserResponse> getCurrentUser(
             @Parameter(
                     name = "id",
                     description = "Unique identifier of the user",
                     required = true,
                     example = "1"
             )
-            Long id
-    );
+            CustomUserDetails userDetails);
 
 
     @Operation(

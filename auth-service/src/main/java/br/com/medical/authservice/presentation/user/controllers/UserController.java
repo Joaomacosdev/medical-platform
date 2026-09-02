@@ -1,6 +1,7 @@
 package br.com.medical.authservice.presentation.user.controllers;
 
 import br.com.medical.authservice.application.user.usecase.*;
+import br.com.medical.authservice.infra.security.CustomUserDetails;
 import br.com.medical.authservice.presentation.user.controllers.docs.UserControllerDocs;
 import br.com.medical.authservice.presentation.user.mapper.UserPresentationMapper;
 import br.com.medical.authservice.presentation.user.requests.CreateUserRequest;
@@ -11,6 +12,8 @@ import br.com.medical.authservice.presentation.user.responses.UserResponse;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -51,13 +54,15 @@ public class UserController implements UserControllerDocs {
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/me")
+    @PreAuthorize("isAuthenticated()")
     @Override
-    public ResponseEntity<UserResponse> getUserById(@PathVariable Long id){
-        return ResponseEntity.ok(UserPresentationMapper.toResponse(findByIdUserUseCase.execute(id)));
+    public ResponseEntity<UserResponse> getCurrentUser(   @AuthenticationPrincipal CustomUserDetails userDetails){
+        return ResponseEntity.ok(UserPresentationMapper.toResponse(findByIdUserUseCase.execute(userDetails.getUserId())));
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('MEDICO')")
     @Override
     public ResponseEntity<?> getUsers(
             @RequestParam(required = false) String email,
@@ -84,6 +89,7 @@ public class UserController implements UserControllerDocs {
     }
 
     @PutMapping("/{id}")
+    @PreAuthorize("#id == authentication.principal.userId")
     @Override
     public ResponseEntity<UserResponse> updateUser(@PathVariable Long id, @Valid @RequestBody UpdateUserRequest updateUserRequest){
 
@@ -96,6 +102,7 @@ public class UserController implements UserControllerDocs {
     }
 
     @PatchMapping("/{id}/password")
+    @PreAuthorize("#id == authentication.principal.userId")
     @Override
     public ResponseEntity<UserResponse> updateUserPassword(
             @PathVariable Long id,
@@ -110,6 +117,8 @@ public class UserController implements UserControllerDocs {
     }
 
     @PatchMapping("/{id}/role")
+    @PreAuthorize("hasRole('ADMIN')")
+
     @Override
     public ResponseEntity<UserResponse> updateUserRole(@PathVariable Long id, @Valid @RequestBody UpdateRoleRequest updateRoleRequest){
 
@@ -122,6 +131,9 @@ public class UserController implements UserControllerDocs {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize(
+            "hasRole('ADMIN') or #id == authentication.principal.userId"
+    )
     @Override
     public ResponseEntity<Void> deleteUserById(@PathVariable Long id){
         deleteByIdUserUseCase.execute(id);

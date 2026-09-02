@@ -1,87 +1,70 @@
 package br.com.medical.authservice.infra.security;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
-import com.auth0.jwt.interfaces.DecodedJWT;
-import com.auth0.jwt.interfaces.JWTVerifier;
-import com.auth0.jwt.exceptions.JWTVerificationException;
+import br.com.medical.authservice.domain.user.entities.User;
+import br.com.medical.authservice.domain.user.gateways.UserGateway;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.List;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-    private final JWTVerifier verifier;
 
-    public JwtAuthenticationFilter(
-            @Value("${security.jwt.secret}") String secret
-    ) {
+    private final JwtTokenService jwtTokenService;
+    private final UserGateway userGateway;
 
-        Algorithm algorithm = Algorithm.HMAC256(secret);
 
-        this.verifier = JWT.require(algorithm)
-                .build();
+    public JwtAuthenticationFilter(JwtTokenService jwtTokenService, UserGateway userGateway) {
+        this.jwtTokenService = jwtTokenService;
+        this.userGateway = userGateway;
     }
 
     @Override
-    protected void doFilterInternal(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            FilterChain filterChain
-    ) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
-        String authorization =
-                request.getHeader("Authorization");
+        String token = retrieveRequestToken(request);
 
-        if (authorization == null ||
-                !authorization.startsWith("Bearer ")) {
 
-            filterChain.doFilter(request, response);
-            return;
-        }
+        if (token != null) {
+            String email = jwtTokenService.verify(token);
 
-        String token = authorization.substring(7);
+            var userOptional = userGateway.findByEmail(email);
 
-        try {
+            if (userOptional.isEmpty()) {
+                filterChain.doFilter(request, response);
+                return;
+            }
 
-            DecodedJWT jwt = verifier.verify(token);
+            User user = userOptional.get();
 
-            String userId = jwt.getSubject();
+            var userDetails = new CustomUserDetails(user);
 
-            String role = jwt.getClaim("role").asString();
 
-            var authorities = List.of(
-                    new SimpleGrantedAuthority(
-                            "ROLE_" + role
-                    )
-            );
+            Authentication authentication =
+                    new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
-            UsernamePasswordAuthenticationToken authentication =
-                    new UsernamePasswordAuthenticationToken(
-                            userId,
-                            null,
-                            authorities
-                    );
-
-            SecurityContextHolder
-                    .getContext()
-                    .setAuthentication(authentication);
-
-        } catch (JWTVerificationException exception) {
-
-            SecurityContextHolder.clearContext();
+            SecurityContextHolder.getContext().setAuthentication(authentication);
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private String retrieveRequestToken(HttpServletRequest request) {
+
+        String authorizationHeader = request.getHeader("Authorization");
+
+        if (authorizationHeader == null ||
+                !authorizationHeader.startsWith("Bearer ")) {
+            return null;
+        }
+
+        return authorizationHeader.substring(7);
     }
 }

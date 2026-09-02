@@ -3,11 +3,13 @@ package br.com.medical.authservice.application.authentication.dto;
 public class AuthenticationOutput {
 
     private String accessToken;
+    private String refreshToken;
     private String tokenType;
     private long expiresIn;
 
     private AuthenticationOutput(Builder builder) {
         this.accessToken = builder.accessToken;
+        this.refreshToken = builder.refreshToken;
         this.tokenType = builder.tokenType;
         this.expiresIn = builder.expiresIn;
     }
@@ -18,11 +20,18 @@ public class AuthenticationOutput {
 
     public static class Builder{
         private String accessToken;
+        private String refreshToken;
         private String tokenType;
         private long expiresIn;
 
         public Builder accessToken(String accessToken) {
             this.accessToken = accessToken;
+            return this;
+        }
+
+
+        public Builder refreshToken(String refreshToken) {
+            this.refreshToken = refreshToken;
             return this;
         }
 
@@ -43,6 +52,10 @@ public class AuthenticationOutput {
 
     public String getAccessToken() {
         return accessToken;
+    }
+
+    public String getRefreshToken() {
+        return refreshToken;
     }
 
     public String getTokenType() {

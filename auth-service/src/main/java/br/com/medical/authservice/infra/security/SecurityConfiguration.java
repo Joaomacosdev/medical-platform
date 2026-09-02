@@ -16,53 +16,39 @@ import static org.springframework.security.config.http.SessionCreationPolicy.STA
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+
 public class SecurityConfiguration {
 
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final JwtAuthenticationFilter  jwtAuthenticationFilter;
 
-    public SecurityConfiguration(
-            JwtAuthenticationFilter jwtAuthenticationFilter
-    ) {
+    public SecurityConfiguration(JwtAuthenticationFilter jwtAuthenticationFilter) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
+        return http.csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(sm -> sm.sessionCreationPolicy(STATELESS))
+                .authorizeHttpRequests(req ->{
 
-        return http
-                .csrf(AbstractHttpConfigurer::disable)
+                    req.requestMatchers(
+                            "/api/users/v1",
+                            "/api/auth/v1/login",
+                            "/api/auth/v1/refresh-token",
+                            "/swagger-ui/**",
+                            "/v3/api-docs/**"
+                    ).permitAll();
 
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(
-                                STATELESS
-                        )
-                )
+                    req.anyRequest().authenticated();
 
-                .authorizeHttpRequests(auth -> auth
-
-                        .requestMatchers(
-                                "/api/users/v1",
-                                "/v1/auth/login",
-                                "/swagger-ui/**",
-                                "/v3/api-docs/**"
-                        ).permitAll()
-
-                        .anyRequest()
-                        .authenticated()
-                )
-
-                .addFilterBefore(
-                        jwtAuthenticationFilter,
-                        UsernamePasswordAuthenticationFilter.class
-                )
-
+                })
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) {
-        return authenticationConfiguration.getAuthenticationManager();
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception{
+        return  authenticationConfiguration.getAuthenticationManager();
     }
-
 
 }
