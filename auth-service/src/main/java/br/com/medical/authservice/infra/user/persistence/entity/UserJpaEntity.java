@@ -31,7 +31,7 @@ public class UserJpaEntity {
     @Column(name = "is_active", nullable = false)
     private boolean isActive = true;
 
-    protected UserJpaEntity() {
+    public UserJpaEntity() {
     }
 
     public UserJpaEntity(
