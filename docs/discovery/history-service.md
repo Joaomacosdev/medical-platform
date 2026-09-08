@@ -16,13 +16,14 @@ Este documento separa:
 1. `ADJT - BB - Tech Challenge - Fase 3.pdf` - fonte normativa.
 2. `Documento_Engenharia_Software_TechChallenge_Fase3 (1).pdf` - especificacao complementar.
 3. Conversa com o responsavel pelo repositorio - distribuicao operacional do grupo.
-4. Codigo da branch `main` - estado real implementado.
+4. Cartao [`[Historico]`](https://trello.com/c/UeilKSCJ/8-hist%C3%B3rico) no Trello - estado operacional mutavel do trabalho.
+5. Codigo das branches remotas - estado real implementado.
 
 Em caso de conflito, prevalece o PDF oficial da FIAP.
 
 ## 3. Responsabilidade confirmada
 
-A conversa com Joao confirma que Vinicius ficou com **Historico + GraphQL**. O PDF de Engenharia distribui "Seguranca e GraphQL" para um integrante generico, mas nao relaciona os numeros dos integrantes aos nomes da equipe. A distribuicao nominal do grupo e usada para separar as responsabilidades.
+A conversa com Joao e o cartao [`[Historico]`](https://trello.com/c/UeilKSCJ/8-hist%C3%B3rico), etiquetado com `Vinicius`, confirmam que Vinicius ficou com **Historico + GraphQL**. Em 08/09/2026, o cartao continuava no Backlog e nao possuia descricao ou checklist adicional. O PDF de Engenharia distribui "Seguranca e GraphQL" para um integrante generico, mas nao relaciona os numeros dos integrantes aos nomes da equipe. A distribuicao nominal do grupo e usada para separar as responsabilidades.
 
 Dentro do `history-service`, Vinicius e responsavel por:
 
@@ -35,7 +36,7 @@ Sao responsabilidades condicionais, e nao atribuicoes confirmadas:
 
 - persistencia ou banco proprio para o historico;
 - consumo de eventos do Agendamento;
-- implementacao da edicao do historico, pois os campos e o servico proprietario ainda nao foram definidos.
+- implementacao da edicao do historico medico, pois o significado, os campos e o servico proprietario ainda nao foram definidos.
 
 Nao fazem parte do escopo pessoal de Vinicius: implementar o servico de Autenticacao, publicar eventos do Agendamento, escolher/configurar o broker ou enviar notificacoes.
 
@@ -51,9 +52,9 @@ O sistema deve permitir filtrar, por GraphQL, somente consultas futuras.
 
 ### HIS-RF-03 - Acesso do medico
 
-O medico pode visualizar o historico de pacientes e deve existir uma operacao que permita editar o historico.
+O medico pode visualizar o historico de pacientes e deve existir uma operacao que permita editar o historico medico.
 
-O enunciado nao define quais campos do historico podem ser editados. Essa decisao permanece pendente.
+O documento de Engenharia lista a edicao do historico medico e a edicao de consultas como requisitos diferentes. O enunciado nao define quais campos do historico podem ser editados nem qual servico e o proprietario dessa operacao. Essa decisao permanece pendente.
 
 ### HIS-RF-04 - Acesso do enfermeiro
 
@@ -131,7 +132,7 @@ Regras propostas:
 - `futureOnly = true`: comparar instantes e considerar apenas `scheduledAt > now`;
 - ausencia de registros retorna lista vazia, nunca `null`.
 
-A operacao de edicao pelo medico sera definida separadamente como mutation GraphQL ou endpoint REST depois que os campos editaveis forem aprovados.
+A operacao de edicao do historico medico sera definida separadamente como mutation GraphQL ou endpoint REST depois que o significado, o ownership e os campos editaveis forem aprovados.
 
 ## 8. Contrato de evento condicional
 
@@ -168,7 +169,9 @@ O `history-service` precisa receber uma identidade autenticada contendo, no mini
 - `role`;
 - `patientId`, quando o usuario representar um paciente.
 
-Essa informacao ainda nao esta disponivel na `main`. O grupo deve escolher como ela chega ao servico:
+Em `origin/feature/auth-service` (`b158de5`), o Auth Service passou a emitir access token Bearer assinado com HMAC-256, issuer `auth-service`, `sub` igual ao `userId` e claims `email` e `role`. Esse contrato permite identificar usuario e perfil, mas ainda nao define um `patientId` separado nem a estrategia de validacao nos demais servicos.
+
+O grupo deve escolher como a identidade chega ao History Service:
 
 1. HTTP Basic validado localmente em cada API;
 2. token emitido por Autenticacao e validado pelos demais servicos;
@@ -204,7 +207,7 @@ Uma chamada remota ao servico de Autenticacao em toda requisicao nao e a opcao r
 - [ ] Reentrega do mesmo `eventId` nao duplica efeito.
 - [ ] Evento invalido segue a politica de erro definida pelo grupo.
 
-### Edicao do historico
+### Edicao do historico medico
 
 - [ ] Medico consegue editar apenas os campos aprovados.
 - [ ] Enfermeiro e paciente nao conseguem editar.
@@ -295,13 +298,15 @@ Persistencia e migration entram somente depois da decisao de banco/read model pr
 
 **Aceite:** testes de seguranca cobrem sucesso, 401, 403 e isolamento.
 
-### HIS-09 - Implementar edicao do historico
+### HIS-09 - Implementar edicao do historico medico
 
-- escolher mutation GraphQL ou REST;
+**Condicional:** executar depois que o grupo definir significado, campos e ownership sem confundir historico medico com edicao de consulta.
+
+- escolher mutation GraphQL ou endpoint REST;
 - validar campos editaveis;
 - registrar auditoria da alteracao.
 
-**Aceite:** medico edita; enfermeiro e paciente recebem acesso negado.
+**Aceite:** medico edita os campos aprovados; enfermeiro e paciente recebem acesso negado.
 
 ### HIS-10 - Documentar e integrar
 
@@ -319,7 +324,8 @@ Persistencia e migration entram somente depois da decisao de banco/read model pr
 | Kafka ou RabbitMQ | Mensageria/equipe | Bloqueia apenas um consumidor condicional; nao bloqueia GraphQL |
 | Forma de propagacao da identidade | Autenticacao/equipe | Nao e possivel garantir roles e isolamento do paciente |
 | Campos e tipos do evento | Agendamento/Mensageria | Read model pode nascer incompativel |
-| Significado e campos editaveis do historico | Equipe/professor | Nao e possivel cumprir com seguranca a edicao pelo medico |
+| Significado, campos e ownership da edicao do historico medico | Equipe/professor | Nao e possivel implementar escrita sem inventar requisito |
+| Relacao entre `userId` e `patientId` | Autenticacao/Agendamento | Nao e possivel garantir o isolamento do paciente |
 | Banco do Historico | Arquitetura/equipe | Persistencia, migration e testes ficam indefinidos |
 
 ## 13. Definicao de pronto do History Service
@@ -341,3 +347,5 @@ Para a entrega final do modulo, ainda sera necessario, conforme os contratos da 
 - testar persistencia e mensageria, somente se forem adotadas;
 - manter a execucao local reproduzivel;
 - fornecer exemplos reais no README e na collection.
+
+A collection importavel do Postman ja esta disponivel no modulo. Os exemplos retornam uma lista vazia enquanto a fonte real nao estiver integrada.
