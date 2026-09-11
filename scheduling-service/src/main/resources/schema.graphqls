@@ -1,0 +1,41 @@
+type Query {
+    "Historico de consultas com filtros opcionais. Pacientes so recebem as proprias consultas."
+    historicoConsultas(filtro: ConsultaFiltroInput): [Consulta!]!
+    "Busca uma consulta especifica pelo id."
+    consulta(id: ID!): Consulta
+}
+
+type Consulta {
+    id: ID!
+    pacienteId: ID!
+    profissionalId: ID!
+    dataSolicitacao: String!
+    dataConsulta: String!
+    tipo: ConsultaTipo!
+    status: ConsultaStatus!
+    observacoes: String
+    createdAt: String!
+    updatedAt: String!
+}
+
+enum ConsultaTipo {
+    PRESENCIAL
+    TELEMEDICINA
+    RETORNO
+    EXAME
+}
+
+enum ConsultaStatus {
+    AGENDADA
+    CONFIRMADA
+    CANCELADA
+    REALIZADA
+}
+
+input ConsultaFiltroInput {
+    pacienteId: ID
+    profissionalId: ID
+    status: ConsultaStatus
+    "Data no formato yyyy-MM-dd"
+    data: String
+}

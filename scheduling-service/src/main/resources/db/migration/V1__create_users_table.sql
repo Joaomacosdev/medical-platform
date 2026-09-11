@@ -1,0 +1,14 @@
+CREATE TABLE users
+(
+    id         BIGINT AUTO_INCREMENT PRIMARY KEY,
+    name       VARCHAR(150) NOT NULL,
+    email      VARCHAR(150) NOT NULL,
+    password   VARCHAR(255) NOT NULL,
+    role       VARCHAR(20)  NOT NULL,
+    created_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CONSTRAINT uk_users_email UNIQUE (email),
+    CONSTRAINT ck_users_role CHECK (role IN ('MEDICO', 'ENFERMEIRO', 'PACIENTE'))
+) ENGINE = InnoDB;
+
+CREATE INDEX idx_users_role ON users (role);

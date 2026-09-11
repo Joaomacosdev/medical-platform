@@ -1,0 +1,234 @@
+{
+  "info": {
+    "name": "Scheduling Service - Agendamento Hospitalar",
+    "description": "Collection completa do servico de agendamento: autenticacao (Basic Auth -> JWT), CRUD de consultas, disponibilidade e GraphQL.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8084" },
+    { "key": "tokenMedico", "value": "" },
+    { "key": "tokenEnfermeiro", "value": "" },
+    { "key": "tokenPaciente", "value": "" },
+    { "key": "profissionalId", "value": "1" },
+    { "key": "pacienteId", "value": "3" },
+    { "key": "consultaId", "value": "1" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login Medico",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                { "key": "username", "value": "medico@hospital.com" },
+                { "key": "password", "value": "Senha@123" }
+              ]
+            },
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/v1/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "v1", "auth", "login"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('tokenMedico', json.token);",
+                  "pm.test('login retornou token', () => pm.expect(json.token).to.be.a('string'));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login Enfermeiro",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                { "key": "username", "value": "enfermeiro@hospital.com" },
+                { "key": "password", "value": "Senha@123" }
+              ]
+            },
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/v1/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "v1", "auth", "login"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('tokenEnfermeiro', json.token);"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login Paciente",
+          "request": {
+            "method": "POST",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                { "key": "username", "value": "paciente@hospital.com" },
+                { "key": "password", "value": "Senha@123" }
+              ]
+            },
+            "header": [],
+            "url": { "raw": "{{baseUrl}}/api/v1/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "v1", "auth", "login"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const json = pm.response.json();",
+                  "pm.collectionVariables.set('tokenPaciente', json.token);"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Consultas",
+      "item": [
+        {
+          "name": "Criar Consulta (medico/enfermeiro)",
+          "request": {
+            "method": "POST",
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{tokenMedico}}" }] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pacienteId\": {{pacienteId}},\n  \"profissionalId\": {{profissionalId}},\n  \"dataConsulta\": \"2026-12-01T10:00:00\",\n  \"tipo\": \"PRESENCIAL\",\n  \"observacoes\": \"Consulta de rotina\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/v1/consultas", "host": ["{{baseUrl}}"], "path": ["api", "v1", "consultas"] }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "  pm.collectionVariables.set('consultaId', pm.response.json().id);",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Editar Consulta (medico/enfermeiro)",
+          "request": {
+            "method": "PUT",
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{tokenMedico}}" }] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataConsulta\": \"2026-12-01T14:00:00\",\n  \"status\": \"CONFIRMADA\",\n  \"observacoes\": \"Reagendada\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/v1/consultas/{{consultaId}}", "host": ["{{baseUrl}}"], "path": ["api", "v1", "consultas", "{{consultaId}}"] }
+          }
+        },
+        {
+          "name": "Listar Consultas (com filtros)",
+          "request": {
+            "method": "GET",
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{tokenMedico}}" }] },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/consultas?status=AGENDADA",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "consultas"],
+              "query": [{ "key": "status", "value": "AGENDADA" }]
+            }
+          }
+        },
+        {
+          "name": "Buscar Consulta por Id",
+          "request": {
+            "method": "GET",
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{tokenMedico}}" }] },
+            "url": { "raw": "{{baseUrl}}/api/v1/consultas/{{consultaId}}", "host": ["{{baseUrl}}"], "path": ["api", "v1", "consultas", "{{consultaId}}"] }
+          }
+        },
+        {
+          "name": "Listar Minhas Consultas (paciente)",
+          "request": {
+            "method": "GET",
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{tokenPaciente}}" }] },
+            "url": { "raw": "{{baseUrl}}/api/v1/consultas", "host": ["{{baseUrl}}"], "path": ["api", "v1", "consultas"] }
+          }
+        },
+        {
+          "name": "Cancelar Consulta (medico/enfermeiro)",
+          "request": {
+            "method": "DELETE",
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{tokenMedico}}" }] },
+            "url": { "raw": "{{baseUrl}}/api/v1/consultas/{{consultaId}}", "host": ["{{baseUrl}}"], "path": ["api", "v1", "consultas", "{{consultaId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Disponibilidade",
+      "item": [
+        {
+          "name": "Consultar Horarios Disponiveis",
+          "request": {
+            "method": "GET",
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{tokenPaciente}}" }] },
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/disponibilidade?profissionalId={{profissionalId}}&data=2026-12-01",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "disponibilidade"],
+              "query": [
+                { "key": "profissionalId", "value": "{{profissionalId}}" },
+                { "key": "data", "value": "2026-12-01" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "GraphQL",
+      "item": [
+        {
+          "name": "Historico de Consultas",
+          "request": {
+            "method": "POST",
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{tokenMedico}}" }] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query($filtro: ConsultaFiltroInput) { historicoConsultas(filtro: $filtro) { id pacienteId profissionalId dataConsulta tipo status } }\",\n  \"variables\": { \"filtro\": { \"status\": \"AGENDADA\" } }\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/graphql", "host": ["{{baseUrl}}"], "path": ["graphql"] }
+          }
+        },
+        {
+          "name": "Consulta por Id",
+          "request": {
+            "method": "POST",
+            "auth": { "type": "bearer", "bearer": [{ "key": "token", "value": "{{tokenMedico}}" }] },
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query($id: ID!) { consulta(id: $id) { id status dataConsulta observacoes } }\",\n  \"variables\": { \"id\": \"{{consultaId}}\" }\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/graphql", "host": ["{{baseUrl}}"], "path": ["graphql"] }
+          }
+        }
+      ]
+    }
+  ]
+}
