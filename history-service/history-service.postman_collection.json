@@ -1,0 +1,169 @@
+{
+  "info": {
+    "_postman_id": "f31f5cb4-0ca3-4ce2-8a6d-39cc80c433ad",
+    "name": "Medical Platform - History Service",
+    "description": "Collection de smoke test para o contrato GraphQL do historico de pacientes. Os testes de filtro e ordenacao permanecem na suite automatizada. Defina accessToken com o JWT emitido pelo Auth Service quando a integracao de seguranca estiver ativa.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8083"
+    },
+    {
+      "key": "patientId",
+      "value": "patient-1"
+    },
+    {
+      "key": "accessToken",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Consultar historico completo",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"query AppointmentHistory($patientId: ID!, $futureOnly: Boolean!) { appointmentHistory(patientId: $patientId, futureOnly: $futureOnly) { appointmentId patientId doctorId scheduledAt status } }\",\n  \"variables\": {\n    \"patientId\": \"{{patientId}}\",\n    \"futureOnly\": false\n  }\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/graphql",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        },
+        "description": "Retorna todas as consultas encontradas para o paciente, ordenadas por data e identificador."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Resposta GraphQL sem erros', function () {",
+              "    const body = pm.response.json();",
+              "    pm.expect(body.errors).to.be.undefined;",
+              "    pm.expect(body.data.appointmentHistory).to.be.an('array');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Consultar somente consultas futuras",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"query AppointmentHistory($patientId: ID!, $futureOnly: Boolean!) { appointmentHistory(patientId: $patientId, futureOnly: $futureOnly) { appointmentId patientId doctorId scheduledAt status } }\",\n  \"variables\": {\n    \"patientId\": \"{{patientId}}\",\n    \"futureOnly\": true\n  }\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/graphql",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        },
+        "description": "Retorna apenas consultas com scheduledAt estritamente posterior ao instante atual."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200', function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test('Resposta GraphQL sem erros', function () {",
+              "    const body = pm.response.json();",
+              "    pm.expect(body.errors).to.be.undefined;",
+              "    pm.expect(body.data.appointmentHistory).to.be.an('array');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Validar patientId vazio",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"query\": \"query { appointmentHistory(patientId: \\\" \\\") { appointmentId } }\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/graphql",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "graphql"
+          ]
+        },
+        "description": "Demonstra o erro GraphQL BAD_REQUEST para um identificador vazio."
+      },
+      "response": [],
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('HTTP 200 com erro GraphQL', function () {",
+              "    pm.response.to.have.status(200);",
+              "    const body = pm.response.json();",
+              "    pm.expect(body.errors).to.be.an('array').that.is.not.empty;",
+              "    pm.expect(body.errors[0].extensions.classification).to.eql('BAD_REQUEST');",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
