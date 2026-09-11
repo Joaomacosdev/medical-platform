@@ -40,3 +40,4 @@ build/
 
 ### Docs ###
 docs/
+.env
