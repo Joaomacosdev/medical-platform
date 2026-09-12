@@ -54,8 +54,9 @@ public class ReservationPublisherService implements ConsultaEventPublisher {
                 consultation
         );
 
+        log.info("Publicando payload: patientId={}, patientName={}, patientEmail={}, doctor={}",
+                payload.patientId(), payload.patientName(), payload.patientEmail(),
+                payload.consultation().doctorName());
         rabbitTemplate.convertAndSend(medicalExchange, "", payload);
-        log.info("Notificacao da consulta {} publicada em {} para o paciente {}",
-                consulta.getId(), medicalExchange, paciente.getEmail());
     }
 }

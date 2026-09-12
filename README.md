@@ -125,8 +125,30 @@ mvn clean install
 
 ## Testes manuais
 
-1. Suba MySQL + RabbitMQ: `docker compose up -d mysql-scheduling rabbitmq`
-2. Suba scheduling-service: `docker compose up -d scheduling-service`
-3. Suba notification-service (com SMTP no .env): `docker compose up -d notification-service`
-4. Faça login: `curl -u medico@hospital.com:Senha@123 -X POST http://localhost:8084/api/v1/auth/login`
-5. Crie consulta (REST ou GraphQL) → notificação publicada no RabbitMQ → e-mail enviado
+1. Suba tudo: `docker compose up -d --build`
+2. Obter token JWT:
+   ```bash
+   curl -u medico@hospital.com:Senha@123 -X POST http://localhost:8084/api/v1/auth/login
+   ```
+   Resposta: `{"accessToken": "eyJ...", "tokenType": "Bearer", "expiresIn": 3600000}`
+
+3. Criar consulta (dispara notificação no RabbitMQ):
+   ```bash
+   TOKEN="eyJ..."  # token do passo anterior
+   curl -X POST http://localhost:8084/api/v1/consultas \
+     -H "Authorization: Bearer $TOKEN" \
+     -H "Content-Type: application/json" \
+     -d '{
+       "pacienteId": 3,
+       "profissionalId": 1,
+       "dataConsulta": "2026-10-01T14:30:00",
+       "tipo": "PRESENCIAL"
+     }'
+   ```
+   Usuários de demonstração: `medico@hospital.com` / `paciente@hospital.com` (senha: `Senha@123`).
+
+4. Ver logs:
+   ```bash
+   docker compose logs scheduling-service --tail 5 | grep "Publicando"
+   docker compose logs notification-service --tail 10
+   ```
