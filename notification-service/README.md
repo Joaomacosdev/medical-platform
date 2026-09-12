@@ -46,6 +46,7 @@ O produtor deve publicar os dados atuais quando uma consulta for criada ou edita
 ```json
 {
   "patientId": 1,
+  "patientName": "Joao Lima",
   "patientEmail": "paciente@example.com",
   "patientNumber": null,
   "consultation": {
@@ -62,6 +63,7 @@ Use um destinatario sob seu controle e uma data futura ao executar o teste. O en
 | Campo | Uso e validacao atual |
 | --- | --- |
 | `patientId` | Identificador do paciente; nao utilizado no envio atual. |
+| `patientName` | Nome do paciente para saudacao "Ola, {nome}!". Nao pode ser nulo ou vazio. |
 | `patientEmail` | Destinatario; nao pode ser nulo ou vazio. A aplicacao nao possui validacao propria completa do formato do e-mail. |
 | `patientNumber` | Telefone reservado para evolucao; pode ser nulo, nao ha envio SMS. |
 | `consultation` | Necessario para extrair os dados do e-mail. |
@@ -88,7 +90,7 @@ Exemplo ilustrativo do e-mail esperado para o payload acima:
 ```text
 Assunto: Notificação de consulta
 
-Olá!
+Olá, Joao Lima!
 
 Confira os dados da sua consulta:
 Médico(a): Dra. Ana

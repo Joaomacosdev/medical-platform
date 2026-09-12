@@ -190,6 +190,7 @@ ReservationPublisherService --> medical_exchange (fanout) --> email_queue
 ```json
 {
   "patientId": 3,
+  "patientName": "Joao Lima",
   "patientEmail": "paciente@hospital.com",
   "patientNumber": "4002-8922",
   "consultation": {
