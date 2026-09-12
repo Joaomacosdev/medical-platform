@@ -48,6 +48,7 @@ public class ReservationPublisherService implements ConsultaEventPublisher {
         );
         var payload = new ReservationNotificationPayload(
                 paciente.getId(),
+                paciente.getNome(),
                 paciente.getEmail(),
                 paciente.getTelefone(),
                 consultation

@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 
 public record ReservationNotificationPayload(
         Long patientId,
+        String patientName,
         String patientEmail,
         String patientNumber,
         ConsultationDetails consultation
