@@ -58,6 +58,7 @@ class ReservationPublisherServiceTest {
 
         ReservationNotificationPayload payload = captor.getValue();
         assertThat(payload.patientId()).isEqualTo(3L);
+        assertThat(payload.patientName()).isEqualTo("Joao Lima");
         assertThat(payload.patientEmail()).isEqualTo("paciente@hospital.com");
         assertThat(payload.patientNumber()).isEqualTo("4002-8922");
         assertThat(payload.consultation().consultationId()).isEqualTo(10L);
@@ -70,7 +71,7 @@ class ReservationPublisherServiceTest {
     void devePublicarNotificacaoAoEditarConsulta() {
         ReflectionTestUtils.setField(service, "medicalExchange", "medical_exchange");
 
-        Usuario paciente = Usuario.builder().id(3L).email("paciente@hospital.com").role(UserRole.PACIENTE).build();
+        Usuario paciente = Usuario.builder().id(3L).nome("Joao Lima").email("paciente@hospital.com").role(UserRole.PACIENTE).build();
         Usuario medico = Usuario.builder().id(1L).nome("Dr. Ricardo Silva").role(UserRole.MEDICO).build();
         Consulta consulta = Consulta.builder().id(10L).pacienteId(3L).profissionalId(1L)
                 .dataConsulta(LocalDateTime.now().plusDays(2)).status(ConsultaStatus.CONFIRMADA).build();
