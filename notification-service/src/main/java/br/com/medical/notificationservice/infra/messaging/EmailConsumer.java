@@ -26,16 +26,29 @@ public class EmailConsumer {
     public void notificationConsumer(NotificationMessageDTO notificationDTO,
                                      Channel channel, Message message) throws IOException {
         long deliveryTag = message.getMessageProperties().getDeliveryTag();
-        try {
-            var consultation = notificationDTO.consultation();
-            emailService.sendConsultationNotification(notificationDTO.patientEmail(),
-                    consultation.doctorName(), consultation.medicalSpecialty(),
-                    consultation.consultationDate());
-        } catch (Exception e) {
-            log.error("Error while processing notification delivery {}", deliveryTag, e);
-            channel.basicNack(deliveryTag, false, false);
-            return;
+        int maxRetries = 3;
+        long backoff = 1000;
+        var consultation = notificationDTO.consultation();
+        for (int attempt = 0; attempt < maxRetries; attempt++) {
+            try {
+                emailService.sendConsultationNotification(notificationDTO.patientEmail(),
+                        notificationDTO.patientName(), consultation.doctorName(),
+                        consultation.medicalSpecialty(), consultation.consultationDate());
+                channel.basicAck(deliveryTag, false);
+                return;
+            } catch (Exception e) {
+                log.warn("Attempt {} failed for delivery {}", attempt + 1, deliveryTag, e);
+                if (attempt < maxRetries - 1) {
+                    try {
+                        Thread.sleep(backoff);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        channel.basicNack(deliveryTag, false, false);
+                        return;
+                    }
+                }
+            }
         }
-        channel.basicAck(deliveryTag,false);
+        channel.basicNack(deliveryTag, false, false);
     }
 }
