@@ -20,9 +20,9 @@ public class RabbitMQConfig {
     public static final String EXCHANGE_NAME = "medical_exchange";
     public static final String EMAIL_QUEUE =  "email_queue";
     public static final String ROUTING_KEY_NOTIFICATION = "medical.notification";
-    public static final String EXCHANGE_DQL_NAME = "dlq_medical_exchange";
+    public static final String EXCHANGE_DLQ_NAME = "dlq_medical_exchange";
     public static final String ROUTING_KEY_DLQ_NOTIFICATION = "dlq.notification";
-    public static final String DQL_QUEUE = "dql_queue";
+    public static final String DLQ_QUEUE = "dlq_queue";
 
 
     @Bean
@@ -33,7 +33,7 @@ public class RabbitMQConfig {
     @Bean
     public Queue emailQueue() {
         return QueueBuilder.durable(EMAIL_QUEUE)
-                .deadLetterExchange(EXCHANGE_DQL_NAME)
+                .deadLetterExchange(EXCHANGE_DLQ_NAME)
                 .deadLetterRoutingKey(ROUTING_KEY_DLQ_NOTIFICATION)
                 .build();
     }
@@ -43,10 +43,10 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public DirectExchange dlqExchange() {return new DirectExchange(EXCHANGE_DQL_NAME);}
+    public DirectExchange dlqExchange() {return new DirectExchange(EXCHANGE_DLQ_NAME);}
 
     @Bean
-    public Queue dlqQueue() {return new Queue(DQL_QUEUE, true);}
+    public Queue dlqQueue() {return new Queue(DLQ_QUEUE, true);}
 
     @Bean
     public Binding dlqBinding(Queue dlqQueue, DirectExchange dlqExchange){
