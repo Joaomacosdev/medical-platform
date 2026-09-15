@@ -46,6 +46,7 @@ app:
   rabbitmq:
     exchange:
       medical-exchange: ${RABBITMQ_EXCHANGE_MEDICAL:medical_exchange}
+      appointment-events: ${RABBITMQ_EXCHANGE_APPOINTMENT_EVENTS:appointment.events}
       dlq-medical-exchange: ${RABBITMQ_EXCHANGE_DLQ:dlq_medical_exchange}
     queue:
       email-queue: ${RABBITMQ_QUEUE_EMAIL:email_queue}

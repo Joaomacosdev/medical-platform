@@ -41,6 +41,28 @@ services:
     networks:
       - medical-network
 
+  mysql-history:
+    image: mysql:8.0
+    container_name: medical-mysql-history
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${HISTORY_DB_ROOT_PASSWORD:-rootpass123}
+      MYSQL_DATABASE: ${HISTORY_DB_NAME:-history_db}
+      MYSQL_USER: ${HISTORY_DB_USER:-history_service}
+      MYSQL_PASSWORD: ${HISTORY_DB_PASSWORD:-History@00}
+    ports:
+      - "127.0.0.1:3307:3306"
+    volumes:
+      - mysql_history_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - medical-network
+
   rabbitmq:
     image: rabbitmq:4-management
     container_name: medical-rabbitmq
@@ -88,8 +110,24 @@ services:
       dockerfile: Dockerfile
     container_name: medical-history
     restart: unless-stopped
+    depends_on:
+      mysql-history:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
     ports:
       - "${HISTORY_PORT:-8083}:8083"
+    environment:
+      HISTORY_DATASOURCE_URL: jdbc:mysql://mysql-history:3306/${HISTORY_DB_NAME:-history_db}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      HISTORY_DATASOURCE_USERNAME: ${HISTORY_DB_USER:-history_service}
+      HISTORY_DATASOURCE_PASSWORD: ${HISTORY_DB_PASSWORD:-History@00}
+      HISTORY_RABBITMQ_HOST: rabbitmq
+      HISTORY_RABBITMQ_PORT: 5672
+      HISTORY_RABBITMQ_USERNAME: ${RABBITMQ_USER:-notification}
+      HISTORY_RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-guest}
+      HISTORY_RABBITMQ_EXCHANGE_APPOINTMENT_EVENTS: ${RABBITMQ_EXCHANGE_APPOINTMENT_EVENTS:-appointment.events}
+      HISTORY_RABBITMQ_QUEUE_APPOINTMENT_EVENTS: ${HISTORY_RABBITMQ_QUEUE_APPOINTMENT_EVENTS:-history.appointment.events}
+      HISTORY_RABBITMQ_ROUTING_KEY_APPOINTMENT_EVENTS: ${HISTORY_RABBITMQ_ROUTING_KEY_APPOINTMENT_EVENTS:-appointment.#}
     networks:
       - medical-network
 
@@ -154,6 +192,7 @@ services:
 volumes:
   mysql_auth_data:
   mysql_scheduling_data:
+  mysql_history_data:
   rabbitmq_data:
 
 networks:

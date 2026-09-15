@@ -7,13 +7,14 @@ Modulo responsavel pela consulta do historico de consultas dos pacientes por Gra
 - query de historico completo;
 - filtro para apenas consultas futuras;
 - ordenacao deterministica por data e identificador;
-- porta de saida para desacoplar a origem dos dados;
+- persistencia local do read model em banco relacional;
+- consumo de eventos RabbitMQ publicados pelo servico de agendamento;
 - testes unitarios, de contrato GraphQL e de contexto;
 - collection do Postman para smoke test das consultas completa, futura e de validacao;
 - imagem Docker multi-stage executada com usuario sem privilegios;
 - execucao na porta `8083`.
 
-O adaptador atual trabalha em memoria e inicia vazio. Ele valida o fluxo GraphQL, mas ainda precisa ser substituido pela fonte real definida pelo Servico de Agendamento.
+O servico agora mantem um read model proprio em `appointment_events`, alimentado por eventos RabbitMQ do Servico de Agendamento.
 
 Autenticacao e autorizacao permanecem como integracao pendente. A branch de Autenticacao ja emite JWT com `sub` (`userId`) e `role`, porem o grupo ainda precisa confirmar como `patientId` se relaciona com esse usuario e onde o token sera validado. Ate esse contrato ser fechado, o endpoint nao deve ser apresentado como seguro para dados reais.
 
@@ -30,7 +31,7 @@ presentation/graphql -> application/usecase -> domain/gateway
 
 - `domain`: modelo e porta de acesso aos dados, sem dependencia do Spring;
 - `application`: regra para buscar, filtrar e ordenar o historico;
-- `infra`: composicao dos beans e adaptador temporario em memoria;
+- `infra`: composicao dos beans, persistencia JPA/Flyway e consumidor RabbitMQ;
 - `presentation`: controller, mapper e DTO de resposta GraphQL.
 
 ## Executar
@@ -43,6 +44,36 @@ No diretorio `history-service`:
 ```
 
 Endpoint GraphQL: `http://localhost:8083/graphql`
+
+Para ambiente integrado com Docker Compose, o servico depende de MySQL e RabbitMQ. O compose principal sobe `mysql-history`, `rabbitmq` e injeta as variaveis de conexao automaticamente no container.
+
+Exemplo com `curl` para consultar o historico completo:
+
+```bash
+curl -X POST http://localhost:8083/graphql \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "query": "query AppointmentHistory($patientId: ID!, $futureOnly: Boolean!) { appointmentHistory(patientId: $patientId, futureOnly: $futureOnly) { appointmentId patientId doctorId scheduledAt status } }",
+    "variables": {
+      "patientId": "patient-1",
+      "futureOnly": false
+    }
+  }'
+```
+
+Exemplo com `curl` para consultar somente consultas futuras:
+
+```bash
+curl -X POST http://localhost:8083/graphql \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "query": "query AppointmentHistory($patientId: ID!, $futureOnly: Boolean!) { appointmentHistory(patientId: $patientId, futureOnly: $futureOnly) { appointmentId patientId doctorId scheduledAt status } }",
+    "variables": {
+      "patientId": "patient-1",
+      "futureOnly": true
+    }
+  }'
+```
 
 ## Executar com Docker
 
@@ -79,7 +110,7 @@ query {
 }
 ```
 
-Enquanto a fonte real de dados nao estiver integrada, a resposta esperada e:
+Se nenhum evento tiver sido consumido ainda, a resposta esperada e:
 
 ```json
 {
@@ -95,8 +126,7 @@ O campo `scheduledAt` usa o formato ISO-8601 com offset, por exemplo `2026-09-01
 
 - definir a relacao entre o `userId` do JWT e o `patientId` usado nas consultas;
 - definir onde e como o JWT sera validado pelos demais servicos;
-- publicar o contrato de leitura/evento do Agendamento;
-- escolher se o Historico consulta o Agendamento ou mantem um read model proprio.
+- alinhar o contrato final do evento com os demais integrantes do grupo.
 - definir o significado, os campos e o servico proprietario da edicao de historico medico.
 
-Kafka/RabbitMQ e o envio de notificacoes nao pertencem ao escopo deste modulo. Se o grupo optar por alimentar o historico com eventos, o consumidor so deve ser criado depois da publicacao do contrato do Agendamento.
+O historico agora e alimentado por RabbitMQ. O proximo passo de integracao e validar o fluxo ponta a ponta publicando eventos reais do `scheduling-service` e consultando o GraphQL do `history-service` no ambiente Docker Compose.

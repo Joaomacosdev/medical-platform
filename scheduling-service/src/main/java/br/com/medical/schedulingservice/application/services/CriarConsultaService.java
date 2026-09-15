@@ -9,6 +9,8 @@ import br.com.medical.schedulingservice.domain.entities.Consulta;
 import br.com.medical.schedulingservice.domain.entities.ConsultaStatus;
 import br.com.medical.schedulingservice.domain.entities.UserRole;
 import br.com.medical.schedulingservice.domain.entities.Usuario;
+import br.com.medical.schedulingservice.domain.events.AppointmentEventType;
+import br.com.medical.schedulingservice.domain.events.AppointmentHistoryEvent;
 import br.com.medical.schedulingservice.domain.events.ConsultaEventPublisher;
 import br.com.medical.schedulingservice.domain.exceptions.AcessoNegadoException;
 import br.com.medical.schedulingservice.domain.exceptions.ConsultaInvalidaException;
@@ -18,6 +20,7 @@ import br.com.medical.schedulingservice.domain.repositories.ConsultaRepository;
 import br.com.medical.schedulingservice.domain.repositories.UsuarioRepository;
 import br.com.medical.schedulingservice.domain.usecases.CriarConsultaUseCase;
 import br.com.medical.schedulingservice.domain.usecases.NovaConsultaComando;
+import br.com.medical.schedulingservice.frameworks.rabbitmq.AppointmentEventPublisherService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -29,6 +32,7 @@ public class CriarConsultaService implements CriarConsultaUseCase {
     private final ConsultaRepository consultaRepository;
     private final UsuarioRepository usuarioRepository;
     private final ConsultaEventPublisher consultaEventPublisher;
+    private final AppointmentEventPublisherService appointmentEventPublisher;
 
     @Override
     @Transactional
@@ -69,6 +73,13 @@ public class CriarConsultaService implements CriarConsultaUseCase {
         log.info("Consulta {} criada para paciente {} com profissional {}", salva.getId(), salva.getPacienteId(), salva.getProfissionalId());
 
         consultaEventPublisher.publicarConsultaCriada(salva);
+        appointmentEventPublisher.publishEvent(new AppointmentHistoryEvent(
+            AppointmentEventType.APPOINTMENT_CREATED,
+            salva.getId(),
+            salva.getPacienteId(),
+            salva.getProfissionalId(),
+            salva.getDataConsulta(),
+            salva.getStatus().name()));
 
         return salva;
     }

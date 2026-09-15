@@ -34,6 +34,11 @@ public class ReservationPublisherService implements ConsultaEventPublisher {
         publicar(consulta);
     }
 
+        @Override
+        public void publicarConsultaCancelada(Consulta consulta) {
+                publicar(consulta);
+        }
+
     private void publicar(Consulta consulta) {
         Usuario paciente = usuarioRepository.buscarPorId(consulta.getPacienteId())
                 .orElseThrow(() -> new UsuarioNotFoundException(consulta.getPacienteId()));

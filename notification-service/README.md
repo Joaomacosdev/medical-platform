@@ -93,9 +93,9 @@ Assunto: Notificação de consulta
 Olá, Joao Lima!
 
 Confira os dados da sua consulta:
-Médico(a): Dra. Ana
+Médico(a): Dr. Ricardo Silva
 Especialidade: Cardiologia
-Data e horário: 20/06/2027 14:30
+Data e horário: 28/09/2027 14:30
 
 Equipe Medical
 ```

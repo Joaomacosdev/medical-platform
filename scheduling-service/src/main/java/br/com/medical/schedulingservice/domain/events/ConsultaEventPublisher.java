@@ -7,4 +7,6 @@ public interface ConsultaEventPublisher {
     void publicarConsultaCriada(Consulta consulta);
 
     void publicarConsultaEditada(Consulta consulta);
+
+    void publicarConsultaCancelada(Consulta consulta);
 }

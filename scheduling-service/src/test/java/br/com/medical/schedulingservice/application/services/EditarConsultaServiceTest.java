@@ -20,6 +20,7 @@ import br.com.medical.schedulingservice.domain.exceptions.ConsultaNotFoundExcept
 import br.com.medical.schedulingservice.domain.exceptions.SlotIndisponivelException;
 import br.com.medical.schedulingservice.domain.repositories.ConsultaRepository;
 import br.com.medical.schedulingservice.domain.usecases.EditarConsultaComando;
+import br.com.medical.schedulingservice.frameworks.rabbitmq.AppointmentEventPublisherService;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -35,6 +36,8 @@ class EditarConsultaServiceTest {
     private ConsultaRepository consultaRepository;
     @Mock
     private ConsultaEventPublisher consultaEventPublisher;
+    @Mock
+    private AppointmentEventPublisherService appointmentEventPublisher;
 
     @InjectMocks
     private EditarConsultaService service;
@@ -67,6 +70,7 @@ class EditarConsultaServiceTest {
         assertThat(resultado.getTipo()).isEqualTo(ConsultaTipo.RETORNO);
         assertThat(resultado.getObservacoes()).isEqualTo("nova obs");
         verify(consultaEventPublisher).publicarConsultaEditada(resultado);
+        verify(appointmentEventPublisher).publishEvent(any());
     }
 
     @Test
