@@ -11,15 +11,18 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import br.com.medical.schedulingservice.domain.entities.Consulta;
 import br.com.medical.schedulingservice.domain.entities.ConsultaStatus;
 import br.com.medical.schedulingservice.domain.entities.UserRole;
+import br.com.medical.schedulingservice.domain.events.ConsultaEventPublisher;
 import br.com.medical.schedulingservice.domain.exceptions.AcessoNegadoException;
 import br.com.medical.schedulingservice.domain.exceptions.ConsultaInvalidaException;
 import br.com.medical.schedulingservice.domain.exceptions.ConsultaNotFoundException;
 import br.com.medical.schedulingservice.domain.repositories.ConsultaRepository;
 import br.com.medical.schedulingservice.domain.usecases.CancelarConsultaComando;
+import br.com.medical.schedulingservice.frameworks.rabbitmq.AppointmentEventPublisherService;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -27,6 +30,10 @@ class CancelarConsultaServiceTest {
 
     @Mock
     private ConsultaRepository consultaRepository;
+    @Mock
+    private ConsultaEventPublisher consultaEventPublisher;
+    @Mock
+    private AppointmentEventPublisherService appointmentEventPublisher;
 
     @InjectMocks
     private CancelarConsultaService service;
@@ -41,6 +48,8 @@ class CancelarConsultaServiceTest {
         Consulta resultado = service.cancelar(comando);
 
         assertThat(resultado.getStatus()).isEqualTo(ConsultaStatus.CANCELADA);
+        verify(consultaEventPublisher).publicarConsultaCancelada(resultado);
+        verify(appointmentEventPublisher).publishEvent(any());
     }
 
     @Test

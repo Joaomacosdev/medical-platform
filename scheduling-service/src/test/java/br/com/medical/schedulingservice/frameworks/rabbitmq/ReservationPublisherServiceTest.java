@@ -83,4 +83,21 @@ class ReservationPublisherServiceTest {
 
         verify(rabbitTemplate).convertAndSend(eq("medical_exchange"), eq(""), org.mockito.ArgumentMatchers.any(ReservationNotificationPayload.class));
     }
+
+        @Test
+        void devePublicarNotificacaoAoCancelarConsulta() {
+                ReflectionTestUtils.setField(service, "medicalExchange", "medical_exchange");
+
+                Usuario paciente = Usuario.builder().id(3L).nome("Joao Lima").email("paciente@hospital.com").role(UserRole.PACIENTE).build();
+                Usuario medico = Usuario.builder().id(1L).nome("Dr. Ricardo Silva").role(UserRole.MEDICO).build();
+                Consulta consulta = Consulta.builder().id(10L).pacienteId(3L).profissionalId(1L)
+                                .dataConsulta(LocalDateTime.now().plusDays(2)).status(ConsultaStatus.CANCELADA).build();
+
+                when(usuarioRepository.buscarPorId(3L)).thenReturn(Optional.of(paciente));
+                when(usuarioRepository.buscarPorId(1L)).thenReturn(Optional.of(medico));
+
+                service.publicarConsultaCancelada(consulta);
+
+                verify(rabbitTemplate).convertAndSend(eq("medical_exchange"), eq(""), org.mockito.ArgumentMatchers.any(ReservationNotificationPayload.class));
+        }
 }

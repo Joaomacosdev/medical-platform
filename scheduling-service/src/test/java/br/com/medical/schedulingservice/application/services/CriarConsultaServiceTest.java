@@ -23,6 +23,7 @@ import br.com.medical.schedulingservice.domain.exceptions.UsuarioNotFoundExcepti
 import br.com.medical.schedulingservice.domain.repositories.ConsultaRepository;
 import br.com.medical.schedulingservice.domain.repositories.UsuarioRepository;
 import br.com.medical.schedulingservice.domain.usecases.NovaConsultaComando;
+import br.com.medical.schedulingservice.frameworks.rabbitmq.AppointmentEventPublisherService;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -42,6 +43,8 @@ class CriarConsultaServiceTest {
     private UsuarioRepository usuarioRepository;
     @Mock
     private ConsultaEventPublisher consultaEventPublisher;
+    @Mock
+    private AppointmentEventPublisherService appointmentEventPublisher;
 
     @InjectMocks
     private CriarConsultaService service;
@@ -77,6 +80,7 @@ class CriarConsultaServiceTest {
         assertThat(resultado.getPacienteId()).isEqualTo(1L);
         assertThat(resultado.getProfissionalId()).isEqualTo(2L);
         verify(consultaEventPublisher).publicarConsultaCriada(resultado);
+        verify(appointmentEventPublisher).publishEvent(any());
     }
 
     @Test
