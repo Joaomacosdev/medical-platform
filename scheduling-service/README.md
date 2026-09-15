@@ -1,8 +1,8 @@
 # Scheduling Service — Agendamento de Consultas
 
 Serviço de agendamento de consultas de uma plataforma hospitalar, construído com Spring Boot e
-Clean Architecture. Suporta CRUD de consultas, consulta de disponibilidade, autenticação
-Basic → JWT com três perfis de acesso, publicação de notificações no RabbitMQ e consulta de
+Clean Architecture. Suporta CRUD de consultas, consulta de disponibilidade, validação de JWT do auth-service
+com três perfis clínicos de acesso, publicação de notificações no RabbitMQ e consulta de
 histórico via GraphQL.
 
 Este serviço é o **producer** das notificações de agendamento: ele publica no RabbitMQ e os
@@ -46,7 +46,7 @@ br.com.medical.schedulingservice/
 ├── frameworks/
 │   ├── persistence/          # Entidades JPA, repositórios Spring Data, adapters dos ports de domínio
 │   ├── rabbitmq/               # Topologia (exchanges/filas/DLQ), publisher e payload de notificação
-│   └── security/              # JWT, Basic Auth, filtros e configuração do Spring Security
+│   └── security/              # Validação JWT do auth, filtros e configuração do Spring Security
 └── config/                   # Configuração transversal (OpenAPI)
 ```
 
@@ -56,10 +56,8 @@ dependem de interfaces definidas em `domain`; nunca o inverso. As implementaçõ
 RabbitMQ não exigiu nenhuma mudança em `domain` ou `application`, só a troca do adapter em
 `frameworks` (`ReservationPublisherService` implementa a mesma porta `ConsultaEventPublisher`).
 
-**Trade-off assumido conscientemente**: os controllers usam os tipos `UserDetails`
-(`AuthController`) e `UsuarioAutenticado` (demais controllers) para representar o usuário
-autenticado — o segundo vive em `domain.auth` justamente para não acoplar os controllers a classes
-de `frameworks.security`.
+Os controllers usam IdentidadeAutenticada no cadastro e UsuarioAutenticado
+(com ID local resolvido pelo vínculo) nas consultas.
 
 ## Perfis e permissões
 
@@ -73,24 +71,19 @@ A autorização é validada em duas camadas: `@PreAuthorize` nos controllers (RE
 regras de negócio no `application/services` (ex.: um paciente nunca recebe consultas de outro
 paciente, mesmo que tente manipular o filtro da query).
 
-## Autenticação
+## Autenticação e cadastro
 
-1. `POST /api/v1/auth/login` — autenticado via **HTTP Basic** (email/senha). O Spring Security
-   valida as credenciais (`BCryptPasswordEncoder`) antes do controller ser executado.
-2. A resposta traz um **JWT** (`Bearer`) que deve ser enviado no header `Authorization` de todas as
-   demais chamadas (REST e GraphQL).
+Faça login JSON no auth-service (POST /api/auth/v1/login, porta 8081 no Compose).
+Use o access token nas requisições protegidas do scheduling.
 
-```bash
-curl -u medico@hospital.com:Senha@123 -X POST http://localhost:8084/api/v1/auth/login
-```
+Complete seu cadastro com PUT /api/v1/cadastro/me. O ID do auth vem do token;
+o ID local retornado identifica paciente/profissional nas consultas.
+Sem cadastro, as operações clínicas retornam 409 CADASTRO_PENDENTE.
 
-## Usuários de demonstração (seed Flyway `V4__seed_demo_users.sql` / `V5__add_telefone_especialidade_to_users.sql`)
-
-| Email | Senha | Perfil | Telefone | Especialidade |
-|---|---|---|---|---|
-| medico@hospital.com | Senha@123 | MEDICO | 4002-8922 | Cardiologia |
-| enfermeiro@hospital.com | Senha@123 | ENFERMEIRO | 4002-8922 | — |
-| paciente@hospital.com | Senha@123 | PACIENTE | 4002-8922 | — |
+Consulte o [guia de integração](../AUTH_SCHEDULING.md) para payloads,
+provisionamento de profissionais e vínculo administrativo de cadastros legados.
+A V6 remove senhas locais. Registros do seed V4 ficam sem vínculo até
+conferência administrativa e não servem mais para login.
 
 ## Subindo o ambiente
 
@@ -118,7 +111,8 @@ Para rodar localmente sem Docker (com MySQL/RabbitMQ já disponíveis), exporte 
 
 | Método | Rota | Perfis | Descrição |
 |---|---|---|---|
-| POST | `/auth/login` | (Basic Auth) | Autentica e emite o JWT |
+| PUT | /cadastro/me | MEDICO, ENFERMEIRO, PACIENTE | Cria ou substitui cadastro próprio |
+| GET | /cadastro/me | MEDICO, ENFERMEIRO, PACIENTE | Lê cadastro próprio |
 | POST | `/consultas` | MEDICO, ENFERMEIRO | Cria consulta (publica notificação no RabbitMQ) |
 | PUT | `/consultas/{id}` | MEDICO, ENFERMEIRO | Edita consulta (publica notificação no RabbitMQ) |
 | GET | `/consultas` | MEDICO, ENFERMEIRO, PACIENTE | Lista com filtros `pacienteId`, `profissionalId`, `status`, `data` |
@@ -126,7 +120,7 @@ Para rodar localmente sem Docker (com MySQL/RabbitMQ já disponíveis), exporte 
 | DELETE | `/consultas/{id}` | MEDICO, ENFERMEIRO | Cancela a consulta |
 | GET | `/disponibilidade?profissionalId=&data=` | MEDICO, ENFERMEIRO, PACIENTE | Horários livres de um profissional |
 
-Payload de erro padronizado (`ApiError`) em todas as respostas de erro:
+Payload de erro padronizado (`ApiError`) nos controllers. O filtro de segurança retorna HTTP 401/403/409 com campo code. Exemplo:
 
 ```json
 {
@@ -230,9 +224,8 @@ payload.
 
 ## Postman
 
-Importe `postman/scheduling-service.postman_collection.json`. A pasta **Auth** salva os tokens de
-cada perfil em variáveis da collection (`tokenMedico`, `tokenEnfermeiro`, `tokenPaciente`),
-reutilizadas automaticamente pelas demais requisições.
+Importe postman/scheduling-service.postman_collection.json ou a collection completa
+em ../postman/. Execute as pastas em ordem; as contas de teste são criadas automaticamente no auth. Tokens vêm do auth; IDs locais são capturados.
 
 ## Variáveis de ambiente
 
@@ -246,4 +239,3 @@ Veja `.env.example`. As principais:
 | `RABBITMQ_QUEUE_EMAIL` / `RABBITMQ_QUEUE_DLQ` | Nomes das filas | `email_queue` / `dlq_queue` |
 | `RABBITMQ_ROUTING_KEY_DLQ` | Routing key da DLQ | `dlq.notification` |
 | `JWT_SECRET` | Chave HMAC do JWT (troque em produção) | — |
-| `JWT_ACCESS_EXPIRATION` | Expiração do access token (ms) | `3600000` |

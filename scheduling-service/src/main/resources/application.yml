@@ -56,9 +56,7 @@ app:
 security:
   jwt:
     secret: ${JWT_SECRET:chave-local-apenas-para-desenvolvimento}
-    issuer: ${JWT_ISSUER:scheduling-service}
-    access-expiration: ${JWT_ACCESS_EXPIRATION:3600000}
-    refresh-expiration: ${JWT_REFRESH_EXPIRATION:604800000}
+    issuer: ${JWT_ISSUER:auth-service}
 
 spring-doc:
   paths-to-match: /api/**/v1/**

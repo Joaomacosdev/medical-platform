@@ -28,6 +28,11 @@ public class UsuarioRepositoryImpl implements UsuarioRepository {
     }
 
     @Override
+    public Optional<Usuario> buscarPorAuthUserId(Long authUserId) {
+        return jpaRepository.findByAuthUserId(authUserId).map(mapper::toDomain);
+    }
+
+    @Override
     public Usuario salvar(Usuario usuario) {
         var salvo = jpaRepository.save(mapper.toEntity(usuario));
         return mapper.toDomain(salvo);

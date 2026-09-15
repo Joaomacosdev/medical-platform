@@ -55,9 +55,9 @@ class ConsultaRepositoryImplIT {
     @Test
     void deveSalvarBuscarEFiltrarConsultaPersistida() {
         Usuario paciente = usuarioRepository.salvar(Usuario.builder()
-                .nome("Paciente Teste").email("paciente.it@teste.com").senha("hash").role(UserRole.PACIENTE).build());
+                .nome("Paciente Teste").email("paciente.it@teste.com").role(UserRole.PACIENTE).build());
         Usuario medico = usuarioRepository.salvar(Usuario.builder()
-                .nome("Medico Teste").email("medico.it@teste.com").senha("hash").role(UserRole.MEDICO).build());
+                .nome("Medico Teste").email("medico.it@teste.com").role(UserRole.MEDICO).build());
 
         LocalDateTime dataConsulta = LocalDateTime.now().plusDays(1).withNano(0);
         Consulta consulta = Consulta.builder()

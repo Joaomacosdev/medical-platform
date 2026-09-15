@@ -1,0 +1,92 @@
+[
+  {
+    "id": "integration",
+    "collection": "postman/auth-scheduling.integration.postman_collection.json",
+    "finished": "2026-09-15T03:27:17.023Z",
+    "requests": {
+      "total": 37,
+      "pending": 0,
+      "failed": 0
+    },
+    "assertions": {
+      "total": 84,
+      "pending": 0,
+      "failed": 0
+    },
+    "failures": []
+  },
+  {
+    "id": "platform",
+    "collection": "postman/medical-platform.postman_collection.json",
+    "finished": "2026-09-15T03:27:24.873Z",
+    "requests": {
+      "total": 63,
+      "pending": 0,
+      "failed": 0
+    },
+    "assertions": {
+      "total": 115,
+      "pending": 0,
+      "failed": 4
+    },
+    "failures": [
+      {
+        "request": "Atualizar perfil",
+        "test": "HTTP 200",
+        "message": "expected response to have status code 200 but got 409"
+      },
+      {
+        "request": "Cadastro invalido",
+        "test": "HTTP 400",
+        "message": "expected response to have status code 400 but got 401"
+      },
+      {
+        "request": "Login nova senha",
+        "test": "HTTP 200",
+        "message": "expected response to have status code 200 but got 401"
+      },
+      {
+        "request": "Login nova senha",
+        "test": "Capturar accessToken",
+        "message": "expected undefined to exist"
+      }
+    ]
+  },
+  {
+    "id": "scheduling",
+    "collection": "scheduling-service/postman/scheduling-service.postman_collection.json",
+    "finished": "2026-09-15T03:27:32.372Z",
+    "requests": {
+      "total": 58,
+      "pending": 0,
+      "failed": 0
+    },
+    "assertions": {
+      "total": 101,
+      "pending": 0,
+      "failed": 4
+    },
+    "failures": [
+      {
+        "request": "Atualizar perfil",
+        "test": "HTTP 200",
+        "message": "expected response to have status code 200 but got 409"
+      },
+      {
+        "request": "Cadastro invalido",
+        "test": "HTTP 400",
+        "message": "expected response to have status code 400 but got 401"
+      },
+      {
+        "request": "Login nova senha",
+        "test": "HTTP 200",
+        "message": "expected response to have status code 200 but got 401"
+      },
+      {
+        "request": "Login nova senha",
+        "test": "Capturar accessToken",
+        "message": "expected undefined to exist"
+      }
+    ]
+  }
+]

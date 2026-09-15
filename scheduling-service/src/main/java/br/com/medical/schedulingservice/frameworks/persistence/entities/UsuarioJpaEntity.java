@@ -39,8 +39,8 @@ public class UsuarioJpaEntity {
     @Column(name = "email", nullable = false, unique = true, length = 150)
     private String email;
 
-    @Column(name = "password", nullable = false)
-    private String senha;
+    @Column(name = "auth_user_id", unique = true)
+    private Long authUserId;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false, length = 20)

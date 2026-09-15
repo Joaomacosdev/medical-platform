@@ -8,5 +8,7 @@ import br.com.medical.schedulingservice.frameworks.persistence.entities.UsuarioJ
 
 public interface UsuarioJpaRepository extends JpaRepository<UsuarioJpaEntity, Long> {
 
+    Optional<UsuarioJpaEntity> findByAuthUserId(Long authUserId);
+
     Optional<UsuarioJpaEntity> findByEmail(String email);
 }

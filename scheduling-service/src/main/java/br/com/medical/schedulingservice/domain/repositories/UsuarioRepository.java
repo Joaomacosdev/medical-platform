@@ -10,5 +10,7 @@ public interface UsuarioRepository {
 
     Optional<Usuario> buscarPorEmail(String email);
 
+    Optional<Usuario> buscarPorAuthUserId(Long authUserId);
+
     Usuario salvar(Usuario usuario);
 }

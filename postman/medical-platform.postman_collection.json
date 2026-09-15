@@ -1,6 +1,6 @@
 {
   "info": {
-    "name": "Scheduling - Login no auth e cadastro",
+    "name": "Medical Platform - Testes completos",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
     "description": "Fluxo com auth-service existente, sem alteracoes: cria contas temporarias, faz login no auth, completa cadastro vinculado no scheduling e testa consultas. Execute na ordem em ambiente de testes."
   },
@@ -1991,6 +1991,185 @@
                 "exec": [
                   "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
                   "pm.test(\"GraphQL sem erros\", () => { const body = pm.response.json(); pm.expect(body.errors).to.be.undefined; pm.expect(body.data).to.have.property(\"historicoConsultas\"); });pm.test(\"Somente paciente\", () => pm.response.json().data.historicoConsultas.forEach(c => pm.expect(String(c.pacienteId)).to.eql(String(pm.variables.get(\"paciente_id\")))));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "05 - History GraphQL",
+      "description": "Adaptador em memoria inicia vazio e nao recebe consultas do scheduling.",
+      "item": [
+        {
+          "name": "Historico completo",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{history_url}}/graphql",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query($patientId: ID!, $futureOnly: Boolean!) { appointmentHistory(patientId: $patientId, futureOnly: $futureOnly) { appointmentId patientId doctorId scheduledAt status } }\",\n  \"variables\": {\n    \"patientId\": \"{{paciente_id}}\",\n    \"futureOnly\": false\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"GraphQL sem erros\", () => { const body = pm.response.json(); pm.expect(body.errors).to.be.undefined; pm.expect(body.data).to.have.property(\"appointmentHistory\"); });pm.test(\"Lista\", () => pm.expect(pm.response.json().data.appointmentHistory).to.be.an(\"array\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Historico futuro",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{history_url}}/graphql",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query($patientId: ID!, $futureOnly: Boolean!) { appointmentHistory(patientId: $patientId, futureOnly: $futureOnly) { appointmentId patientId doctorId scheduledAt status } }\",\n  \"variables\": {\n    \"patientId\": \"{{paciente_id}}\",\n    \"futureOnly\": true\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"GraphQL sem erros\", () => { const body = pm.response.json(); pm.expect(body.errors).to.be.undefined; pm.expect(body.data).to.have.property(\"appointmentHistory\"); });pm.test(\"Lista\", () => pm.expect(pm.response.json().data.appointmentHistory).to.be.an(\"array\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "06 - Notification e RabbitMQ",
+      "description": "Consulta metadados sem consumir mensagens. Criar/editar consulta publica eventos. Entrega de email deve ser confirmada no SMTP/logs.",
+      "item": [
+        {
+          "name": "Ping notification",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{notification_url}}/ping",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"pong\", () => pm.expect(pm.response.text()).to.eql(\"pong\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Inspecionar email_queue",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{rabbitmq_url}}/api/queues/%2F/email_queue",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{rabbitmq_user}}",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{rabbitmq_password}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"name\", () => pm.expect(pm.response.json().name).to.eql(\"email_queue\"));pm.test(\"Contagem\", () => pm.expect(pm.response.json().messages).to.be.a(\"number\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Inspecionar dlq_queue",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{rabbitmq_url}}/api/queues/%2F/dlq_queue",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{rabbitmq_user}}",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{rabbitmq_password}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"name\", () => pm.expect(pm.response.json().name).to.eql(\"dlq_queue\"));pm.test(\"Contagem\", () => pm.expect(pm.response.json().messages).to.be.a(\"number\"));"
                 ]
               }
             }
