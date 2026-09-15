@@ -14,14 +14,14 @@ Plataforma de agendamento médico com microsserviços.
 
 | Serviço | Porta | Banco | Arquitetura | Descrição |
 |---------|-------|-------|-------------|-----------|
-| auth-service | 8081 | MySQL | REST | Autenticação Basic → JWT |
+| auth-service | 8081 | MySQL | REST | Autenticação JSON → JWT |
 | scheduling-service | 8084 | MySQL + Flyway | REST + GraphQL | CRUD consultas, disponibilidade, notificações |
 | notification-service | 8082 | - | RabbitMQ consumer | E-mail via SMTP, retry 3x → DLQ |
 | history-service | 8083 | (memória) | GraphQL | Histórico de consultas |
 
 ### Detalhamento
 
-**auth-service**: Login via HTTP Basic → JWT Bearer. Três perfis: MEDICO, ENFERMEIRO, PACIENTE.
+**auth-service**: Login JSON → JWT Bearer. Perfis: ADMIN, MEDICO, ENFERMEIRO, PACIENTE. A integração preserva o contrato e o comportamento de cadastro existente.
 
 **scheduling-service** (producer RabbitMQ):
 - CRUD de consultas + horários disponíveis
@@ -123,32 +123,19 @@ mvn clean install -DskipTests
 mvn clean install
 ```
 
-## Testes manuais
+## Autenticação e testes manuais
 
-1. Suba tudo: `docker compose up -d --build`
-2. Obter token JWT:
-   ```bash
-   curl -u medico@hospital.com:Senha@123 -X POST http://localhost:8084/api/v1/auth/login
-   ```
-   Resposta: `{"accessToken": "eyJ...", "tokenType": "Bearer", "expiresIn": 3600000}`
+O login é feito exclusivamente no auth-service. Complete o cadastro no scheduling com
+o token do auth antes de operar consultas. O vínculo usa auth_user_id; IDs dos bancos
+não precisam coincidir.
 
-3. Criar consulta (dispara notificação no RabbitMQ):
-   ```bash
-   TOKEN="eyJ..."  # token do passo anterior
-   curl -X POST http://localhost:8084/api/v1/consultas \
-     -H "Authorization: Bearer $TOKEN" \
-     -H "Content-Type: application/json" \
-     -d '{
-       "pacienteId": 3,
-       "profissionalId": 1,
-       "dataConsulta": "2026-10-01T14:30:00",
-       "tipo": "PRESENCIAL"
-     }'
-   ```
-   Usuários de demonstração: `medico@hospital.com` / `paciente@hospital.com` (senha: `Senha@123`).
+1. Suba os serviços com docker compose up -d --build.
+2. Siga o [guia de integração](AUTH_SCHEDULING.md) para cadastrar contas
+   e completar os dados de atendimento.
+3. Importe a [collection completa](postman/medical-platform.postman_collection.json)
+   e o [ambiente local](postman/medical-platform.local.postman_environment.json).
+4. Execute as pastas em ordem pelo Runner; as contas de teste são criadas automaticamente.
+5. Confira notificações com docker compose logs notification-service --tail 100.
 
-4. Ver logs:
-   ```bash
-   docker compose logs scheduling-service --tail 5 | grep "Publicando"
-   docker compose logs notification-service --tail 10
-   ```
+A V6 preserva cadastros e consultas, remove senhas do scheduling e deixa registros
+antigos sem vínculo automático. Veja no guia como vinculá-los após conferir a identidade.

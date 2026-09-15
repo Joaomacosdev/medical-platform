@@ -146,7 +146,7 @@ services:
       RABBITMQ_USERNAME: ${RABBITMQ_USER:-notification}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-guest}
       JWT_SECRET: ${JWT_SECRET:-chave-local-apenas-para-desenvolvimento}
-      JWT_ISSUER: scheduling-service
+      JWT_ISSUER: auth-service
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
     networks:
       - medical-network

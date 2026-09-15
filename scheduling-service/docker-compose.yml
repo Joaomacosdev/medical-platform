@@ -58,8 +58,7 @@ services:
       RABBITMQ_USERNAME: ${RABBITMQ_USERNAME:-guest}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-guest}
       JWT_SECRET: ${JWT_SECRET:-chave-local-apenas-para-desenvolvimento}
-      JWT_ISSUER: ${JWT_ISSUER:-scheduling-service}
-      JWT_ACCESS_EXPIRATION: ${JWT_ACCESS_EXPIRATION:-3600000}
+      JWT_ISSUER: ${JWT_ISSUER:-auth-service}
       JWT_REFRESH_EXPIRATION: ${JWT_REFRESH_EXPIRATION:-604800000}
       LOG_LEVEL: ${LOG_LEVEL:-INFO}
     networks:

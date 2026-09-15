@@ -63,6 +63,16 @@ public class GlobalExceptionHandler {
         return build(HttpStatus.BAD_REQUEST, "Erro de validacao dos dados enviados.", request, details);
     }
 
+    @ExceptionHandler(br.com.medical.schedulingservice.domain.exceptions.CadastroPendenteException.class)
+    public ResponseEntity<ApiError> handleCadastroPendente(RuntimeException ex, WebRequest request) {
+        return build(HttpStatus.CONFLICT, ex.getMessage(), request, null);
+    }
+
+    @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
+    public ResponseEntity<ApiError> handleCadastroConflict(RuntimeException ex, WebRequest request) {
+        return build(HttpStatus.CONFLICT, "Conflito de dados: cadastro ou email ja existente.", request, null);
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleGeneric(Exception ex, WebRequest request) {
         log.error("Erro nao tratado", ex);
