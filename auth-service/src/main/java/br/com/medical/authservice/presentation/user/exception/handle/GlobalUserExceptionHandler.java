@@ -6,11 +6,28 @@ import br.com.medical.authservice.presentation.user.exception.docs.GlobalExcepti
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class GlobalUserExceptionHandler implements GlobalExceptionHandlerDocs {
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ProblemDetail handleValidation(
+            MethodArgumentNotValidException ex,
+            HttpServletRequest request
+    ) {
+        ProblemDetail problemDetail = ProblemDetailFactory.create(
+                HttpStatus.BAD_REQUEST,
+                "VALIDATION_ERROR",
+                "The request contains invalid fields.",
+                "One or more fields are missing or invalid.",
+                request.getRequestURI()
+        );
+
+        return problemDetail;
+    }
 
     @ExceptionHandler(UserNotFoundException.class)
     @Override
