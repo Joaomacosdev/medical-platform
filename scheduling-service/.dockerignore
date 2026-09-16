@@ -1,0 +1,9 @@
+target
+.git
+.idea
+.ai
+.mvn/wrapper
+*.iml
+Dockerfile
+docker-compose.yml
+.env

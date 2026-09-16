@@ -1,0 +1,2525 @@
+{
+  "info": {
+    "name": "Medical Platform - Automatica",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Execute todas as pastas em ordem pelo Runner. Gera contas e datas, captura tokens e IDs, verifica respostas e aguarda eventos do historico. Inclui cancelamento e exclusao das contas temporarias. Falhas conhecidas do auth permanecem visiveis. Sem verificacao inicial de versao."
+  },
+  "variable": [
+    {
+      "key": "auth_url",
+      "value": "http://localhost:8081",
+      "type": "string"
+    },
+    {
+      "key": "scheduling_url",
+      "value": "http://localhost:8084",
+      "type": "string"
+    },
+    {
+      "key": "history_url",
+      "value": "http://localhost:8083",
+      "type": "string"
+    },
+    {
+      "key": "notification_url",
+      "value": "http://localhost:8082",
+      "type": "string"
+    },
+    {
+      "key": "rabbitmq_url",
+      "value": "http://localhost:15672",
+      "type": "string"
+    },
+    {
+      "key": "rabbitmq_user",
+      "value": "notification",
+      "type": "string"
+    },
+    {
+      "key": "rabbitmq_password",
+      "value": "guest",
+      "type": "string"
+    },
+    {
+      "key": "paciente_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "profissional_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "test_password",
+      "value": "Postman@123",
+      "type": "string"
+    },
+    {
+      "key": "new_password",
+      "value": "Postman@456",
+      "type": "string"
+    },
+    {
+      "key": "run_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "consulta_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "consulta_data",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "consulta_nova_data",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "consulta_dia",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "refresh_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "auth_medico_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "auth_paciente_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "auth_enfermeiro_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "auth_admin_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "auth_medico_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "auth_paciente_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "auth_enfermeiro_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "scheduling_admin_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "enfermeiro_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "auth_admin_id",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "history_poll_attempts",
+      "value": "10",
+      "type": "string"
+    },
+    {
+      "key": "history_poll_delay_ms",
+      "value": "1000",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "01 - Auth e usuarios",
+      "description": "Usuarios temporarios exclusivos por execucao. Banco e tokens separados do scheduling.",
+      "item": [
+        {
+          "name": "Criar admin temporario",
+          "request": {
+            "method": "POST",
+            "url": "{{auth_url}}/api/users/v1",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"admin_{{run_id}}\",\n  \"email\": \"admin.{{run_id}}@example.com\",\n  \"password\": \"{{test_password}}\",\n  \"role\": \"ADMIN\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.collectionVariables.set(\"run_id\", pm.variables.replaceIn(\"{{$guid}}\").replace(/-/g, \"\").slice(0,16));",
+                  "pm.collectionVariables.unset(\"consulta_id\");",
+                  "pm.collectionVariables.unset(\"consulta_data\");",
+                  "pm.collectionVariables.unset(\"consulta_nova_data\");",
+                  "pm.collectionVariables.unset(\"consulta_dia\");",
+                  "pm.collectionVariables.unset(\"refresh_token\");",
+                  "pm.collectionVariables.unset(\"auth_admin_id\");",
+                  "pm.collectionVariables.unset(\"auth_medico_id\");",
+                  "pm.collectionVariables.unset(\"auth_paciente_id\");",
+                  "pm.collectionVariables.unset(\"auth_enfermeiro_id\");",
+                  "pm.collectionVariables.unset(\"auth_admin_token\");",
+                  "pm.collectionVariables.unset(\"auth_medico_token\");",
+                  "pm.collectionVariables.unset(\"auth_paciente_token\");",
+                  "pm.collectionVariables.unset(\"auth_enfermeiro_token\");",
+                  "pm.collectionVariables.unset(\"scheduling_admin_token\");",
+                  "pm.collectionVariables.unset(\"auth_medico_token\");",
+                  "pm.collectionVariables.unset(\"auth_paciente_token\");",
+                  "pm.collectionVariables.unset(\"auth_enfermeiro_token\");",
+                  "pm.collectionVariables.unset(\"paciente_id\");",
+                  "pm.collectionVariables.unset(\"profissional_id\");",
+                  "pm.collectionVariables.unset(\"enfermeiro_id\");",
+                  "pm.collectionVariables.unset(\"history_confirmed_retry\");",
+                  "pm.collectionVariables.unset(\"history_cancelled_retry\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Capturar ID\", () => { const id = pm.response.json().id; pm.expect(id).to.exist; if (pm.response.code === 201) pm.collectionVariables.set(\"auth_admin_id\",String(id)); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login admin temporario",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{auth_url}}/api/auth/v1/login",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"admin.{{run_id}}@example.com\",\n  \"password\": \"{{test_password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));pm.test(\"Capturar accessToken\", () => { const v = pm.response.json().accessToken; pm.expect(v).to.exist; if(pm.response.code < 300) pm.collectionVariables.set(\"auth_admin_token\",String(v)); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Criar medico",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{auth_url}}/api/users/v1",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"medico_{{run_id}}\",\n  \"email\": \"medico.{{run_id}}@example.com\",\n  \"password\": \"{{test_password}}\",\n  \"role\": \"MEDICO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Capturar id\", () => { const value = pm.response.json().id; pm.expect(value).to.exist; pm.expect(String(value)).not.to.eql(\"\"); if (pm.response.code < 300) pm.collectionVariables.set(\"auth_medico_id\", String(value)); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login medico",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{auth_url}}/api/auth/v1/login",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"medico.{{run_id}}@example.com\",\n  \"password\": \"{{test_password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Capturar accessToken\", () => { const value = pm.response.json().accessToken; pm.expect(value).to.exist; pm.expect(String(value)).not.to.eql(\"\"); if (pm.response.code < 300) pm.collectionVariables.set(\"auth_medico_token\", String(value)); });pm.test(\"Capturar refreshToken\", () => { const value = pm.response.json().refreshToken; pm.expect(value).to.exist; pm.expect(String(value)).not.to.eql(\"\"); if (pm.response.code < 300) pm.collectionVariables.set(\"refresh_token\", String(value)); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Criar paciente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{auth_url}}/api/users/v1",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"paciente_{{run_id}}\",\n  \"email\": \"paciente.{{run_id}}@example.com\",\n  \"password\": \"{{test_password}}\",\n  \"role\": \"PACIENTE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Capturar id\", () => { const value = pm.response.json().id; pm.expect(value).to.exist; pm.expect(String(value)).not.to.eql(\"\"); if (pm.response.code < 300) pm.collectionVariables.set(\"auth_paciente_id\", String(value)); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login paciente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{auth_url}}/api/auth/v1/login",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"paciente.{{run_id}}@example.com\",\n  \"password\": \"{{test_password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Capturar accessToken\", () => { const value = pm.response.json().accessToken; pm.expect(value).to.exist; pm.expect(String(value)).not.to.eql(\"\"); if (pm.response.code < 300) pm.collectionVariables.set(\"auth_paciente_token\", String(value)); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Renovar tokens",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{auth_url}}/api/auth/v1/refresh-token",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refresh_token}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Capturar accessToken\", () => { const value = pm.response.json().accessToken; pm.expect(value).to.exist; pm.expect(String(value)).not.to.eql(\"\"); if (pm.response.code < 300) pm.collectionVariables.set(\"auth_medico_token\", String(value)); });pm.test(\"Capturar refreshToken\", () => { const value = pm.response.json().refreshToken; pm.expect(value).to.exist; pm.expect(String(value)).not.to.eql(\"\"); if (pm.response.code < 300) pm.collectionVariables.set(\"refresh_token\", String(value)); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Meu perfil",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{auth_url}}/api/users/v1/me",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_medico_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"role\", () => pm.expect(pm.response.json().role).to.eql(\"MEDICO\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar usuarios",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{auth_url}}/api/users/v1",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_medico_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Lista JSON\", () => pm.expect(pm.response.json()).to.be.an(\"array\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar email",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{auth_url}}/api/users/v1?email=paciente.{{run_id}}@example.com",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_medico_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"role\", () => pm.expect(pm.response.json().role).to.eql(\"PACIENTE\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar userName",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{auth_url}}/api/users/v1?userName=paciente_{{run_id}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_medico_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"role\", () => pm.expect(pm.response.json().role).to.eql(\"PACIENTE\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Atualizar perfil",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{auth_url}}/api/users/v1/{{auth_paciente_id}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_paciente_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"editado_{{run_id}}\",\n  \"email\": \"paciente.{{run_id}}@example.com\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Paciente nao lista usuarios",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{auth_url}}/api/users/v1",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_paciente_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Medico nao altera role",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{auth_url}}/api/users/v1/{{auth_paciente_id}}/role",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_medico_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"ENFERMEIRO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Email duplicado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{auth_url}}/api/users/v1",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"duplicado\",\n  \"email\": \"paciente.{{run_id}}@example.com\",\n  \"password\": \"{{test_password}}\",\n  \"role\": \"PACIENTE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 409\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cadastro invalido",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{auth_url}}/api/users/v1",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Senha incorreta",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{auth_url}}/api/auth/v1/login",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"medico.{{run_id}}@example.com\",\n  \"password\": \"Errada@123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Perfil sem token",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{auth_url}}/api/users/v1/me",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Alterar senha",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{auth_url}}/api/users/v1/{{auth_paciente_id}}/password",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_paciente_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"{{new_password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login nova senha",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{auth_url}}/api/auth/v1/login",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"paciente.{{run_id}}@example.com\",\n  \"password\": \"{{new_password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Capturar accessToken\", () => { const value = pm.response.json().accessToken; pm.expect(value).to.exist; pm.expect(String(value)).not.to.eql(\"\"); if (pm.response.code < 300) pm.collectionVariables.set(\"auth_paciente_token\", String(value)); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Criar enfermeiro",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{auth_url}}/api/users/v1",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"enfermeiro_{{run_id}}\",\n  \"email\": \"enfermeiro.{{run_id}}@example.com\",\n  \"password\": \"{{test_password}}\",\n  \"role\": \"ENFERMEIRO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));pm.test(\"Capturar id\", () => { const v = pm.response.json().id; pm.expect(v).to.exist; if(pm.response.code < 300) pm.collectionVariables.set(\"auth_enfermeiro_id\",String(v)); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Login enfermeiro",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{auth_url}}/api/auth/v1/login",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"enfermeiro.{{run_id}}@example.com\",\n  \"password\": \"{{test_password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));pm.test(\"Capturar accessToken\", () => { const v = pm.response.json().accessToken; pm.expect(v).to.exist; if(pm.response.code < 300) pm.collectionVariables.set(\"auth_enfermeiro_token\",String(v)); });"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "02 - Cadastro no scheduling",
+      "description": "Usa exclusivamente tokens do auth. IDs locais sao capturados; nunca presumidos iguais aos IDs do auth.",
+      "item": [
+        {
+          "name": "Paciente sem cadastro",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{scheduling_url}}/api/v1/consultas",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_paciente_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const date = new Date(Date.now() + 30*86400000 + Math.floor(Math.random()*86400)*1000);",
+                  "const start = date.toISOString().slice(0,19);",
+                  "pm.collectionVariables.set(\"consulta_data\", start);",
+                  "pm.collectionVariables.set(\"consulta_dia\", start.slice(0,10));",
+                  "pm.collectionVariables.set(\"consulta_nova_data\", new Date(date.getTime()+86400000).toISOString().slice(0,19));",
+                  "pm.collectionVariables.unset(\"consulta_id\");"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 409\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Completar cadastro medico",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{scheduling_url}}/api/v1/cadastro/me",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_medico_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"medico Postman\",\n  \"emailContato\": \"medico.{{run_id}}@example.com\",\n  \"telefone\": \"11999999999\",\n  \"especialidade\": \"Clinica geral\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));pm.test(\"Capturar id\", () => { const v = pm.response.json().id; pm.expect(v).to.exist; if(pm.response.code < 300) pm.collectionVariables.set(\"profissional_id\",String(v)); });pm.test(\"Vinculo com auth\", () => pm.expect(String(pm.response.json().authUserId)).to.eql(pm.collectionVariables.get(\"auth_medico_id\")));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ler cadastro medico",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{scheduling_url}}/api/v1/cadastro/me",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_medico_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Completar cadastro enfermeiro",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{scheduling_url}}/api/v1/cadastro/me",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_enfermeiro_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"enfermeiro Postman\",\n  \"emailContato\": \"enfermeiro.{{run_id}}@example.com\",\n  \"telefone\": \"11999999999\",\n  \"especialidade\": \"Clinica geral\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));pm.test(\"Capturar id\", () => { const v = pm.response.json().id; pm.expect(v).to.exist; if(pm.response.code < 300) pm.collectionVariables.set(\"enfermeiro_id\",String(v)); });pm.test(\"Vinculo com auth\", () => pm.expect(String(pm.response.json().authUserId)).to.eql(pm.collectionVariables.get(\"auth_enfermeiro_id\")));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ler cadastro enfermeiro",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{scheduling_url}}/api/v1/cadastro/me",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_enfermeiro_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Completar cadastro paciente",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{scheduling_url}}/api/v1/cadastro/me",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_paciente_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"paciente Postman\",\n  \"emailContato\": \"paciente.{{run_id}}@example.com\",\n  \"telefone\": \"11999999999\",\n  \"especialidade\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));pm.test(\"Capturar id\", () => { const v = pm.response.json().id; pm.expect(v).to.exist; if(pm.response.code < 300) pm.collectionVariables.set(\"paciente_id\",String(v)); });pm.test(\"Vinculo com auth\", () => pm.expect(String(pm.response.json().authUserId)).to.eql(pm.collectionVariables.get(\"auth_paciente_id\")));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Ler cadastro paciente",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{scheduling_url}}/api/v1/cadastro/me",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_paciente_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Repetir cadastro preserva ID",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{scheduling_url}}/api/v1/cadastro/me",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_paciente_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"paciente Postman\",\n  \"emailContato\": \"paciente.{{run_id}}@example.com\",\n  \"telefone\": \"11999999999\",\n  \"especialidade\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));pm.test(\"Mesmo ID local\", () => pm.expect(String(pm.response.json().id)).to.eql(pm.collectionVariables.get(\"paciente_id\")));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Refresh token nao acessa scheduling",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{scheduling_url}}/api/v1/cadastro/me",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{refresh_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 401\", () => pm.response.to.have.status(401));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "03 - Consultas REST",
+      "description": "",
+      "item": [
+        {
+          "name": "Saude",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{scheduling_url}}/actuator/health",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"status\", () => pm.expect(pm.response.json().status).to.eql(\"UP\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Informacoes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{scheduling_url}}/actuator/info",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Disponibilidade",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{scheduling_url}}/api/v1/disponibilidade?profissionalId={{profissional_id}}&data={{consulta_dia}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_medico_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Lista JSON\", () => pm.expect(pm.response.json()).to.be.an(\"array\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Criar consulta e notificar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{scheduling_url}}/api/v1/consultas",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_medico_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pacienteId\": \"{{paciente_id}}\",\n  \"profissionalId\": \"{{profissional_id}}\",\n  \"dataConsulta\": \"{{consulta_data}}\",\n  \"tipo\": \"PRESENCIAL\",\n  \"observacoes\": \"Postman {{run_id}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 201\", () => pm.response.to.have.status(201));",
+                  "pm.test(\"Capturar id\", () => { const value = pm.response.json().id; pm.expect(value).to.exist; pm.expect(String(value)).not.to.eql(\"\"); if (pm.response.code < 300) pm.collectionVariables.set(\"consulta_id\", String(value)); });pm.test(\"status\", () => pm.expect(pm.response.json().status).to.eql(\"AGENDADA\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Horario duplicado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{scheduling_url}}/api/v1/consultas",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_medico_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pacienteId\": \"{{paciente_id}}\",\n  \"profissionalId\": \"{{profissional_id}}\",\n  \"dataConsulta\": \"{{consulta_data}}\",\n  \"tipo\": \"PRESENCIAL\",\n  \"observacoes\": \"Postman {{run_id}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 409\", () => pm.response.to.have.status(409));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Paciente nao cria",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{scheduling_url}}/api/v1/consultas",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_paciente_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pacienteId\": \"{{paciente_id}}\",\n  \"profissionalId\": \"{{profissional_id}}\",\n  \"dataConsulta\": \"{{consulta_data}}\",\n  \"tipo\": \"PRESENCIAL\",\n  \"observacoes\": \"Postman {{run_id}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Dados ausentes",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{scheduling_url}}/api/v1/consultas",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_medico_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Data passada",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{scheduling_url}}/api/v1/consultas",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_medico_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pacienteId\": \"{{paciente_id}}\",\n  \"profissionalId\": \"{{profissional_id}}\",\n  \"dataConsulta\": \"2000-01-01T10:00:00\",\n  \"tipo\": \"PRESENCIAL\",\n  \"observacoes\": \"Postman {{run_id}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar consulta",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{scheduling_url}}/api/v1/consultas/{{consulta_id}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_medico_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"status\", () => pm.expect(pm.response.json().status).to.eql(\"AGENDADA\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Consulta inexistente",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{scheduling_url}}/api/v1/consultas/9223372036854775807",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_medico_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 404\", () => pm.response.to.have.status(404));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Enfermeiro lista consultas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{scheduling_url}}/api/v1/consultas",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_enfermeiro_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Lista JSON\", () => pm.expect(pm.response.json()).to.be.an(\"array\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Filtrar consultas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{scheduling_url}}/api/v1/consultas?pacienteId={{paciente_id}}&profissionalId={{profissional_id}}&status=AGENDADA&data={{consulta_dia}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_medico_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Lista JSON\", () => pm.expect(pm.response.json()).to.be.an(\"array\"));pm.test(\"Consulta criada presente\", () => pm.expect(pm.response.json().some(c => String(c.id) === pm.collectionVariables.get(\"consulta_id\"))).to.eql(true));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Paciente lista suas consultas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{scheduling_url}}/api/v1/consultas",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_paciente_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Lista JSON\", () => pm.expect(pm.response.json()).to.be.an(\"array\"));pm.test(\"Somente paciente\", () => { const data = pm.response.json(); pm.expect(data.length).to.be.above(0); data.forEach(c => pm.expect(String(c.pacienteId)).to.eql(String(pm.variables.get(\"paciente_id\")))); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Paciente busca sua consulta",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{scheduling_url}}/api/v1/consultas/{{consulta_id}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_paciente_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"status\", () => pm.expect(pm.response.json().status).to.eql(\"AGENDADA\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Editar e notificar",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{scheduling_url}}/api/v1/consultas/{{consulta_id}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_enfermeiro_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataConsulta\": \"{{consulta_nova_data}}\",\n  \"tipo\": \"TELEMEDICINA\",\n  \"status\": \"CONFIRMADA\",\n  \"observacoes\": \"Editada pelo Postman\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"status\", () => pm.expect(pm.response.json().status).to.eql(\"CONFIRMADA\"));pm.test(\"tipo\", () => pm.expect(pm.response.json().tipo).to.eql(\"TELEMEDICINA\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "04 - Scheduling GraphQL",
+      "description": "",
+      "item": [
+        {
+          "name": "Historico filtrado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{scheduling_url}}/graphql",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_medico_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query($filtro: ConsultaFiltroInput) { historicoConsultas(filtro: $filtro) { id pacienteId profissionalId dataSolicitacao dataConsulta tipo status observacoes createdAt updatedAt } }\",\n  \"variables\": {\n    \"filtro\": {\n      \"pacienteId\": \"{{paciente_id}}\",\n      \"profissionalId\": \"{{profissional_id}}\",\n      \"status\": \"CONFIRMADA\"\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"GraphQL sem erros\", () => { const body = pm.response.json(); pm.expect(body.errors).to.be.undefined; pm.expect(body.data).to.have.property(\"historicoConsultas\"); });"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Consulta por ID",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{scheduling_url}}/graphql",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_medico_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query($id: ID!) { consulta(id: $id) { id pacienteId profissionalId dataSolicitacao dataConsulta tipo status observacoes createdAt updatedAt } }\",\n  \"variables\": {\n    \"id\": \"{{consulta_id}}\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"GraphQL sem erros\", () => { const body = pm.response.json(); pm.expect(body.errors).to.be.undefined; pm.expect(body.data).to.have.property(\"consulta\"); });pm.test(\"Confirmada\", () => pm.expect(pm.response.json().data.consulta.status).to.eql(\"CONFIRMADA\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Historico do paciente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{scheduling_url}}/graphql",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_paciente_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"{ historicoConsultas { id pacienteId profissionalId dataSolicitacao dataConsulta tipo status observacoes createdAt updatedAt } }\",\n  \"variables\": {}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"GraphQL sem erros\", () => { const body = pm.response.json(); pm.expect(body.errors).to.be.undefined; pm.expect(body.data).to.have.property(\"historicoConsultas\"); });pm.test(\"Somente paciente\", () => pm.response.json().data.historicoConsultas.forEach(c => pm.expect(String(c.pacienteId)).to.eql(String(pm.variables.get(\"paciente_id\")))));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "05 - History GraphQL",
+      "description": "Historico persistido e atualizado via RabbitMQ. Aguarda ate 10 tentativas de 1 segundo para encontrar o evento da consulta.",
+      "item": [
+        {
+          "name": "Aguardar historico CONFIRMADA",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{history_url}}/graphql",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query($patientId: ID!, $futureOnly: Boolean!) { appointmentHistory(patientId: $patientId, futureOnly: $futureOnly) { appointmentId patientId doctorId scheduledAt status } }\",\n  \"variables\": {\n    \"patientId\": \"{{paciente_id}}\",\n    \"futureOnly\": false\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let body; try { body = pm.response.json(); } catch (e) {}",
+                  "const rows = body && body.data && body.data.appointmentHistory;",
+                  "const id = String(pm.collectionVariables.get(\"consulta_id\"));",
+                  "const patient = String(pm.collectionVariables.get(\"paciente_id\"));",
+                  "const doctor = String(pm.collectionVariables.get(\"profissional_id\"));",
+                  "const found = Array.isArray(rows) && rows.some(r => String(r.appointmentId) === id && String(r.patientId) === patient && String(r.doctorId) === doctor && r.status === \"CONFIRMADA\");",
+                  "const key = \"history_confirmed_retry\";",
+                  "const attempt = Number(pm.collectionVariables.get(key) || 0) + 1;",
+                  "const max = Math.min(60, Math.max(1, Number(pm.variables.get(\"history_poll_attempts\")) || 10));",
+                  "if (pm.response.code === 200 && body && !body.errors && !found && attempt < max) {",
+                  "  pm.collectionVariables.set(key, String(attempt));",
+                  "  pm.execution.setNextRequest(pm.info.requestName);",
+                  "  setTimeout(() => {}, Math.min(5000, Math.max(0, Number(pm.variables.get(\"history_poll_delay_ms\")) || 1000)));",
+                  "} else {",
+                  "  pm.collectionVariables.unset(key);",
+                  "  pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "  pm.test(\"GraphQL sem erros\", () => { pm.expect(body).to.be.an(\"object\"); pm.expect(body.errors).to.be.undefined; });",
+                  "  pm.test(\"Evento CONFIRMADA da consulta e paciente corretos\", () => pm.expect(found, \"Evento nao recebido: verifique history-service, RabbitMQ e a versao dos containers\").to.eql(true));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Historico futuro",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{history_url}}/graphql",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query($patientId: ID!, $futureOnly: Boolean!) { appointmentHistory(patientId: $patientId, futureOnly: $futureOnly) { appointmentId patientId doctorId scheduledAt status } }\",\n  \"variables\": {\n    \"patientId\": \"{{paciente_id}}\",\n    \"futureOnly\": true\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"GraphQL sem erros\", () => { const body = pm.response.json(); pm.expect(body.errors).to.be.undefined; pm.expect(body.data).to.have.property(\"appointmentHistory\"); });pm.test(\"Lista\", () => pm.expect(pm.response.json().data.appointmentHistory).to.be.an(\"array\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "06 - Notification e RabbitMQ",
+      "description": "Consulta metadados sem consumir mensagens. Criar/editar consulta publica eventos. Entrega de email deve ser confirmada no SMTP/logs.",
+      "item": [
+        {
+          "name": "Ping notification",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{notification_url}}/ping",
+            "auth": {
+              "type": "noauth"
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"pong\", () => pm.expect(pm.response.text()).to.eql(\"pong\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Inspecionar email_queue",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{rabbitmq_url}}/api/queues/%2F/email_queue",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{rabbitmq_user}}",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{rabbitmq_password}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"name\", () => pm.expect(pm.response.json().name).to.eql(\"email_queue\"));pm.test(\"Contagem\", () => pm.expect(pm.response.json().messages).to.be.a(\"number\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Inspecionar dlq_queue",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{rabbitmq_url}}/api/queues/%2F/dlq_queue",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{rabbitmq_user}}",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{rabbitmq_password}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"name\", () => pm.expect(pm.response.json().name).to.eql(\"dlq_queue\"));pm.test(\"Contagem\", () => pm.expect(pm.response.json().messages).to.be.a(\"number\"));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "07 - Cancelamento e limpeza",
+      "description": "Cancela consulta e exclui contas temporarias do auth. Cadastros locais e consulta cancelada permanecem no scheduling.",
+      "item": [
+        {
+          "name": "Paciente nao cancela",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{scheduling_url}}/api/v1/consultas/{{consulta_id}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_paciente_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 403\", () => pm.response.to.have.status(403));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Cancelar consulta criada",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{scheduling_url}}/api/v1/consultas/{{consulta_id}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_medico_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"status\", () => pm.expect(pm.response.json().status).to.eql(\"CANCELADA\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Confirmar cancelamento",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{scheduling_url}}/api/v1/consultas/{{consulta_id}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_medico_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"status\", () => pm.expect(pm.response.json().status).to.eql(\"CANCELADA\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Aguardar historico CANCELADA",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{history_url}}/graphql",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query($patientId: ID!, $futureOnly: Boolean!) { appointmentHistory(patientId: $patientId, futureOnly: $futureOnly) { appointmentId patientId doctorId scheduledAt status } }\",\n  \"variables\": {\n    \"patientId\": \"{{paciente_id}}\",\n    \"futureOnly\": false\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "let body; try { body = pm.response.json(); } catch (e) {}",
+                  "const rows = body && body.data && body.data.appointmentHistory;",
+                  "const id = String(pm.collectionVariables.get(\"consulta_id\"));",
+                  "const patient = String(pm.collectionVariables.get(\"paciente_id\"));",
+                  "const doctor = String(pm.collectionVariables.get(\"profissional_id\"));",
+                  "const found = Array.isArray(rows) && rows.some(r => String(r.appointmentId) === id && String(r.patientId) === patient && String(r.doctorId) === doctor && r.status === \"CANCELADA\");",
+                  "const key = \"history_cancelled_retry\";",
+                  "const attempt = Number(pm.collectionVariables.get(key) || 0) + 1;",
+                  "const max = Math.min(60, Math.max(1, Number(pm.variables.get(\"history_poll_attempts\")) || 10));",
+                  "if (pm.response.code === 200 && body && !body.errors && !found && attempt < max) {",
+                  "  pm.collectionVariables.set(key, String(attempt));",
+                  "  pm.execution.setNextRequest(pm.info.requestName);",
+                  "  setTimeout(() => {}, Math.min(5000, Math.max(0, Number(pm.variables.get(\"history_poll_delay_ms\")) || 1000)));",
+                  "} else {",
+                  "  pm.collectionVariables.unset(key);",
+                  "  pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "  pm.test(\"GraphQL sem erros\", () => { pm.expect(body).to.be.an(\"object\"); pm.expect(body.errors).to.be.undefined; });",
+                  "  pm.test(\"Evento CANCELADA da consulta e paciente corretos\", () => pm.expect(found, \"Evento nao recebido: verifique history-service, RabbitMQ e a versao dos containers\").to.eql(true));",
+                  "}"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Nao editar cancelada",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{scheduling_url}}/api/v1/consultas/{{consulta_id}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_medico_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"observacoes\": \"Nao deve atualizar\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 400\", () => pm.response.to.have.status(400));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Admin altera perfil da conta temporaria",
+          "request": {
+            "method": "PATCH",
+            "url": "{{auth_url}}/api/users/v1/{{auth_paciente_id}}/role",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"role\":\"ENFERMEIRO\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 200\", () => pm.response.to.have.status(200));",
+                  "pm.test(\"Perfil atualizado\", () => pm.expect(pm.response.json().role).to.eql(\"ENFERMEIRO\"));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Excluir temporario paciente",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{auth_url}}/api/users/v1/{{auth_paciente_id}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_admin_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Excluir temporario medico",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{auth_url}}/api/users/v1/{{auth_medico_id}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_admin_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Excluir temporario enfermeiro",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{auth_url}}/api/users/v1/{{auth_enfermeiro_id}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_admin_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        },
+        {
+          "name": "Excluir temporario admin",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{auth_url}}/api/users/v1/{{auth_admin_id}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_admin_token}}",
+                  "type": "string"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test(\"HTTP 204\", () => pm.response.to.have.status(204));"
+                ]
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

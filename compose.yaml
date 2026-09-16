@@ -1,0 +1,200 @@
+services:
+  mysql-auth:
+    image: mysql:8.0
+    container_name: medical-mysql-auth
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${AUTH_DB_ROOT_PASSWORD:-rootpass123}
+      MYSQL_DATABASE: ${AUTH_DB_NAME:-auth_service_db}
+      MYSQL_USER: ${AUTH_DB_USER:-auth_service}
+      MYSQL_PASSWORD: ${AUTH_DB_PASSWORD:-Auth@00}
+    ports:
+      - "127.0.0.1:3303:3306"
+    volumes:
+      - mysql_auth_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - medical-network
+
+  mysql-scheduling:
+    image: mysql:8.0
+    container_name: medical-mysql-scheduling
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${SCHEDULING_DB_ROOT_PASSWORD:-rootpass123}
+      MYSQL_DATABASE: ${SCHEDULING_DB_NAME:-scheduling_db}
+    ports:
+      - "127.0.0.1:3306:3306"
+    volumes:
+      - mysql_scheduling_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - medical-network
+
+  mysql-history:
+    image: mysql:8.0
+    container_name: medical-mysql-history
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${HISTORY_DB_ROOT_PASSWORD:-rootpass123}
+      MYSQL_DATABASE: ${HISTORY_DB_NAME:-history_db}
+      MYSQL_USER: ${HISTORY_DB_USER:-history_service}
+      MYSQL_PASSWORD: ${HISTORY_DB_PASSWORD:-History@00}
+    ports:
+      - "127.0.0.1:3307:3306"
+    volumes:
+      - mysql_history_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - medical-network
+
+  rabbitmq:
+    image: rabbitmq:4-management
+    container_name: medical-rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-notification}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-guest}
+    ports:
+      - "127.0.0.1:5672:5672"
+      - "127.0.0.1:15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "check_running"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    networks:
+      - medical-network
+
+  auth-service:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    container_name: medical-auth
+    restart: unless-stopped
+    depends_on:
+      mysql-auth:
+        condition: service_healthy
+    ports:
+      - "${AUTH_PORT:-8081}:8080"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql-auth:3306/${AUTH_DB_NAME:-auth_service_db}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: ${AUTH_DB_USER:-auth_service}
+      SPRING_DATASOURCE_PASSWORD: ${AUTH_DB_PASSWORD:-Auth@00}
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      JWT_SECRET: ${JWT_SECRET:-chave-local-apenas-para-desenvolvimento}
+    networks:
+      - medical-network
+
+  history-service:
+    build:
+      context: ./history-service
+      dockerfile: Dockerfile
+    container_name: medical-history
+    restart: unless-stopped
+    depends_on:
+      mysql-history:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    ports:
+      - "${HISTORY_PORT:-8083}:8083"
+    environment:
+      HISTORY_DATASOURCE_URL: jdbc:mysql://mysql-history:3306/${HISTORY_DB_NAME:-history_db}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      HISTORY_DATASOURCE_USERNAME: ${HISTORY_DB_USER:-history_service}
+      HISTORY_DATASOURCE_PASSWORD: ${HISTORY_DB_PASSWORD:-History@00}
+      HISTORY_RABBITMQ_HOST: rabbitmq
+      HISTORY_RABBITMQ_PORT: 5672
+      HISTORY_RABBITMQ_USERNAME: ${RABBITMQ_USER:-notification}
+      HISTORY_RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-guest}
+      HISTORY_RABBITMQ_EXCHANGE_APPOINTMENT_EVENTS: ${RABBITMQ_EXCHANGE_APPOINTMENT_EVENTS:-appointment.events}
+      HISTORY_RABBITMQ_QUEUE_APPOINTMENT_EVENTS: ${HISTORY_RABBITMQ_QUEUE_APPOINTMENT_EVENTS:-history.appointment.events}
+      HISTORY_RABBITMQ_ROUTING_KEY_APPOINTMENT_EVENTS: ${HISTORY_RABBITMQ_ROUTING_KEY_APPOINTMENT_EVENTS:-appointment.#}
+    networks:
+      - medical-network
+
+  notification-service:
+    build:
+      context: ./notification-service
+      dockerfile: Dockerfile
+    container_name: medical-notification
+    restart: unless-stopped
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    ports:
+      - "${NOTIFICATION_PORT:-8082}:8080"
+    environment:
+      SERVER_PORT: 8080
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USERNAME: ${RABBITMQ_USER:-notification}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-guest}
+      SMTP_HOST: ${SMTP_HOST:-smtp.gmail.com}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_USERNAME: ${SMTP_USERNAME:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM: ${SMTP_FROM:-${SMTP_USERNAME}}
+      SMTP_AUTH: ${SMTP_AUTH:-true}
+      SMTP_STARTTLS: ${SMTP_STARTTLS:-true}
+      SMTP_STARTTLS_REQUIRED: ${SMTP_STARTTLS_REQUIRED:-true}
+      SMTP_CONNECTION_TIMEOUT: ${SMTP_CONNECTION_TIMEOUT:-5000}
+      SMTP_READ_TIMEOUT: ${SMTP_READ_TIMEOUT:-5000}
+      SMTP_WRITE_TIMEOUT: ${SMTP_WRITE_TIMEOUT:-5000}
+    networks:
+      - medical-network
+
+  scheduling-service:
+    build:
+      context: ./scheduling-service
+      dockerfile: Dockerfile
+    container_name: medical-scheduling
+    restart: unless-stopped
+    depends_on:
+      mysql-scheduling:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    ports:
+      - "${SCHEDULING_PORT:-8084}:8084"
+    environment:
+      DB_URL: jdbc:mysql://mysql-scheduling:3306/${SCHEDULING_DB_NAME:-scheduling_db}
+      DB_USERNAME: ${SCHEDULING_DB_USER:-root}
+      DB_PASSWORD: ${SCHEDULING_DB_PASSWORD:-rootpass123}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      RABBITMQ_USERNAME: ${RABBITMQ_USER:-notification}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD:-guest}
+      JWT_SECRET: ${JWT_SECRET:-chave-local-apenas-para-desenvolvimento}
+      JWT_ISSUER: auth-service
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+    networks:
+      - medical-network
+
+volumes:
+  mysql_auth_data:
+  mysql_scheduling_data:
+  mysql_history_data:
+  rabbitmq_data:
+
+networks:
+  medical-network:
+    driver: bridge
