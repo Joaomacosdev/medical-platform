@@ -44,8 +44,7 @@ class UserJpaAdapterTest {
     void setUp() {
         adapter = new UserJpaAdapter(
                 userJpaRepository,
-                mapper,
-                passwordEncoder
+                mapper
         );
     }
 

@@ -7,15 +7,19 @@ import br.com.medical.authservice.domain.user.exception.EmailAlreadyExistsExcept
 import br.com.medical.authservice.domain.user.gateways.UserGateway;
 import br.com.medical.authservice.domain.user.entities.User;
 import br.com.medical.authservice.domain.user.exception.UserNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 public class CreateUserUseCase {
 
     private final UserGateway userGateway;
+    private final PasswordEncoder passwordEncoder;
 
 
-    public CreateUserUseCase(UserGateway userGateway) {
+
+    public CreateUserUseCase(UserGateway userGateway, PasswordEncoder passwordEncoder) {
         this.userGateway = userGateway;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public UserOutput execute(CreateUserInput input)  {
@@ -24,8 +28,13 @@ public class CreateUserUseCase {
             throw new EmailAlreadyExistsException(input.getEmail());
         }
 
-        var user = UserApplicationMapper.toDomain(input);
-        var savedUser = userGateway.save(user);
+        String encodedPassword =
+                passwordEncoder.encode(input.getPassword());
+
+        var user = UserApplicationMapper.toDomain(
+                input,
+                encodedPassword
+        );        var savedUser = userGateway.save(user);
 
         return UserApplicationMapper.toOutput(savedUser);
 

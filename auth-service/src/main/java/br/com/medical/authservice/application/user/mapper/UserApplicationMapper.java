@@ -8,11 +8,11 @@ import br.com.medical.authservice.domain.user.entities.User;
 
 public class UserApplicationMapper {
 
-    public static User toDomain(CreateUserInput createUserInput){
+    public static User toDomain(CreateUserInput createUserInput,  String encodedPassword){
         return User.builder()
                 .userName(createUserInput.getUserName())
                 .email(createUserInput.getEmail())
-                .password(createUserInput.getPassword())
+                .password(encodedPassword)
                 .role(createUserInput.getRole())
                 .build();
     }

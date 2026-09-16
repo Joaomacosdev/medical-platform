@@ -1,4 +1,4 @@
-        package br.com.medical.authservice.application.user.usecase;
+package br.com.medical.authservice.application.user.usecase;
 
 import br.com.medical.authservice.application.user.dto.CreateUserInput;
 import br.com.medical.authservice.application.user.dto.UserOutput;
@@ -13,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -26,16 +27,23 @@ class CreateUserUseCaseTest {
     private static final String USER_NAME = "John Doe";
     private static final String EMAIL = "john.doe@email.com";
     private static final String PASSWORD = "password123";
+    private static final String ENCODED_PASSWORD = "$2a$10$encodedPassword";
     private static final Role ROLE = Role.MEDICO;
 
     @Mock
     private UserGateway userGateway;
 
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
     private CreateUserUseCase createUserUseCase;
 
     @BeforeEach
     void setUp() {
-        createUserUseCase = new CreateUserUseCase(userGateway);
+        createUserUseCase = new CreateUserUseCase(
+                userGateway,
+                passwordEncoder
+        );
     }
 
     @Test
@@ -44,10 +52,13 @@ class CreateUserUseCaseTest {
 
         CreateUserInput input = createInput();
 
-        User savedUser = createUser();
+        User savedUser = createUser(ENCODED_PASSWORD);
 
         when(userGateway.existsByEmail(EMAIL))
                 .thenReturn(false);
+
+        when(passwordEncoder.encode(PASSWORD))
+                .thenReturn(ENCODED_PASSWORD);
 
         when(userGateway.save(any(User.class)))
                 .thenReturn(savedUser);
@@ -58,6 +69,9 @@ class CreateUserUseCaseTest {
 
         verify(userGateway)
                 .existsByEmail(EMAIL);
+
+        verify(passwordEncoder)
+                .encode(PASSWORD);
 
         verify(userGateway)
                 .save(any(User.class));
@@ -84,18 +98,23 @@ class CreateUserUseCaseTest {
 
         verify(userGateway, never())
                 .save(any(User.class));
+
+        verifyNoInteractions(passwordEncoder);
     }
 
     @Test
-    @DisplayName("Should save the user with the correct data")
-    void shouldSaveUserWithCorrectData() {
+    @DisplayName("Should save the user with the encoded password")
+    void shouldSaveUserWithEncodedPassword() {
 
         CreateUserInput input = createInput();
 
-        User savedUser = createUser();
+        User savedUser = createUser(ENCODED_PASSWORD);
 
         when(userGateway.existsByEmail(EMAIL))
                 .thenReturn(false);
+
+        when(passwordEncoder.encode(PASSWORD))
+                .thenReturn(ENCODED_PASSWORD);
 
         when(userGateway.save(any(User.class)))
                 .thenReturn(savedUser);
@@ -113,10 +132,20 @@ class CreateUserUseCaseTest {
         assertAll(
                 () -> assertEquals(USER_NAME, userToSave.getUserName()),
                 () -> assertEquals(EMAIL, userToSave.getEmail()),
-                () -> assertEquals(PASSWORD, userToSave.getPassword()),
+                () -> assertEquals(
+                        ENCODED_PASSWORD,
+                        userToSave.getPassword()
+                ),
+                () -> assertNotEquals(
+                        PASSWORD,
+                        userToSave.getPassword()
+                ),
                 () -> assertEquals(ROLE, userToSave.getRole()),
                 () -> assertTrue(userToSave.isActive())
         );
+
+        verify(passwordEncoder)
+                .encode(PASSWORD);
     }
 
     @Test
@@ -125,10 +154,13 @@ class CreateUserUseCaseTest {
 
         CreateUserInput input = createInput();
 
-        User savedUser = createUser();
+        User savedUser = createUser(ENCODED_PASSWORD);
 
         when(userGateway.existsByEmail(EMAIL))
                 .thenReturn(false);
+
+        when(passwordEncoder.encode(PASSWORD))
+                .thenReturn(ENCODED_PASSWORD);
 
         when(userGateway.save(any(User.class)))
                 .thenReturn(savedUser);
@@ -146,25 +178,34 @@ class CreateUserUseCaseTest {
     }
 
     @Test
-    @DisplayName("Should check email existence before saving user")
-    void shouldCheckEmailExistenceBeforeSavingUser() {
+    @DisplayName("Should check email existence before encoding and saving user")
+    void shouldCheckEmailExistenceBeforeEncodingAndSavingUser() {
 
         CreateUserInput input = createInput();
 
-        User savedUser = createUser();
+        User savedUser = createUser(ENCODED_PASSWORD);
 
         when(userGateway.existsByEmail(EMAIL))
                 .thenReturn(false);
+
+        when(passwordEncoder.encode(PASSWORD))
+                .thenReturn(ENCODED_PASSWORD);
 
         when(userGateway.save(any(User.class)))
                 .thenReturn(savedUser);
 
         createUserUseCase.execute(input);
 
-        var inOrder = inOrder(userGateway);
+        var inOrder = inOrder(
+                userGateway,
+                passwordEncoder
+        );
 
         inOrder.verify(userGateway)
                 .existsByEmail(EMAIL);
+
+        inOrder.verify(passwordEncoder)
+                .encode(PASSWORD);
 
         inOrder.verify(userGateway)
                 .save(any(User.class));
@@ -194,6 +235,8 @@ class CreateUserUseCaseTest {
 
         verify(userGateway, never())
                 .save(any(User.class));
+
+        verifyNoInteractions(passwordEncoder);
     }
 
     @Test
@@ -208,6 +251,9 @@ class CreateUserUseCaseTest {
         when(userGateway.existsByEmail(EMAIL))
                 .thenReturn(false);
 
+        when(passwordEncoder.encode(PASSWORD))
+                .thenReturn(ENCODED_PASSWORD);
+
         when(userGateway.save(any(User.class)))
                 .thenThrow(exception);
 
@@ -221,13 +267,48 @@ class CreateUserUseCaseTest {
         verify(userGateway)
                 .existsByEmail(EMAIL);
 
+        verify(passwordEncoder)
+                .encode(PASSWORD);
+
         verify(userGateway)
+                .save(any(User.class));
+    }
+
+    @Test
+    @DisplayName("Should propagate exception thrown by password encoder")
+    void shouldPropagateExceptionThrownByPasswordEncoder() {
+
+        CreateUserInput input = createInput();
+
+        RuntimeException exception =
+                new RuntimeException("Encoding error");
+
+        when(userGateway.existsByEmail(EMAIL))
+                .thenReturn(false);
+
+        when(passwordEncoder.encode(PASSWORD))
+                .thenThrow(exception);
+
+        RuntimeException thrown = assertThrows(
+                RuntimeException.class,
+                () -> createUserUseCase.execute(input)
+        );
+
+        assertSame(exception, thrown);
+
+        verify(userGateway)
+                .existsByEmail(EMAIL);
+
+        verify(passwordEncoder)
+                .encode(PASSWORD);
+
+        verify(userGateway, never())
                 .save(any(User.class));
     }
 
     private CreateUserInput createInput() {
 
-        return  CreateUserInput
+        return CreateUserInput
                 .builder()
                 .userName(USER_NAME)
                 .email(EMAIL)
@@ -236,13 +317,13 @@ class CreateUserUseCaseTest {
                 .build();
     }
 
-    private User createUser() {
+    private User createUser(String password) {
 
         return User.builder()
                 .id(USER_ID)
                 .userName(USER_NAME)
                 .email(EMAIL)
-                .password(PASSWORD)
+                .password(password)
                 .role(ROLE)
                 .build();
     }
