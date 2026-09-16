@@ -26,6 +26,8 @@ public class UpdatePasswordUserUseCase {
         String encodedPassword =
                 passwordEncoder.encode(updatePasswordInput.getPassword());
 
+
+
         user.changePassword(encodedPassword);
 
         var savedUser = userGateway.save(user);

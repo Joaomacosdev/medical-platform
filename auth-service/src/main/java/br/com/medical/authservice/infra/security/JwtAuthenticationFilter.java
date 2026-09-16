@@ -17,22 +17,38 @@ import java.io.IOException;
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
+
     private final JwtTokenService jwtTokenService;
     private final UserGateway userGateway;
 
-
-    public JwtAuthenticationFilter(JwtTokenService jwtTokenService, UserGateway userGateway) {
+    public JwtAuthenticationFilter(
+            JwtTokenService jwtTokenService,
+            UserGateway userGateway
+    ) {
         this.jwtTokenService = jwtTokenService;
         this.userGateway = userGateway;
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+
+        String path = request.getServletPath();
+
+        return path.equals("/api/auth/v1/login")
+                || path.equals("/api/auth/v1/refresh-token");
+    }
+
+    @Override
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain
+    ) throws ServletException, IOException {
 
         String token = retrieveRequestToken(request);
 
-
         if (token != null) {
+
             String email = jwtTokenService.verify(token);
 
             var userOptional = userGateway.findByEmail(email);
@@ -46,11 +62,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             var userDetails = new CustomUserDetails(user);
 
-
             Authentication authentication =
-                    new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                    new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities()
+                    );
 
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            SecurityContextHolder.getContext()
+                    .setAuthentication(authentication);
         }
 
         filterChain.doFilter(request, response);
@@ -58,7 +78,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private String retrieveRequestToken(HttpServletRequest request) {
 
-        String authorizationHeader = request.getHeader("Authorization");
+        String authorizationHeader =
+                request.getHeader("Authorization");
 
         if (authorizationHeader == null ||
                 !authorizationHeader.startsWith("Bearer ")) {

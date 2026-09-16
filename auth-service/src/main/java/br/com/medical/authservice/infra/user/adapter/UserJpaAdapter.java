@@ -16,20 +16,17 @@ public class UserJpaAdapter implements UserGateway {
 
     private final UserJpaRepository userJpaRepository;
     private final UserPersistenceMapper mapper;
-    private final PasswordEncoder passwordEncoder;
 
-    public UserJpaAdapter(UserJpaRepository userJpaRepository, UserPersistenceMapper mapper, PasswordEncoder passwordEncoder) {
+    public UserJpaAdapter(UserJpaRepository userJpaRepository, UserPersistenceMapper mapper) {
 
         this.userJpaRepository = userJpaRepository;
         this.mapper = mapper;
-        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
     public User save(User user) {
         UserJpaEntity entity = mapper.toJpa(user);
 
-        entity.setPassword(passwordEncoder.encode(user.getPassword()));
 
 
         UserJpaEntity savedEntity = userJpaRepository.save(entity);

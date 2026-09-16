@@ -27,7 +27,6 @@ public class SpringSecurityAuthenticationAdapter implements AuthenticationGatewa
 
             CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
 
-            assert userDetails != null;
 
 
             return new AuthenticationResult(
@@ -37,6 +36,9 @@ public class SpringSecurityAuthenticationAdapter implements AuthenticationGatewa
             );
 
         } catch (Exception ex) {
+            ex.printStackTrace();
+            System.out.println("TIPO: " + ex.getClass().getName());
+            System.out.println("MENSAGEM: " + ex.getMessage());
             throw new InvalidCredentialsException();
 
         }
