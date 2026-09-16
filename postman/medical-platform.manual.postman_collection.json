@@ -1,0 +1,1816 @@
+{
+  "info": {
+    "name": "Medical Platform - Manual (templates)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Templates para envio individual com Send. Preencha as variaveis da collection; copie tokens e IDs das respostas manualmente. Nao ha scripts, geracao de dados, repeticoes ou limpeza automatica. As requisicoes de cancelamento/exclusao so executam quando voce as envia."
+  },
+  "variable": [
+    {
+      "key": "auth_url",
+      "value": "http://localhost:8081",
+      "type": "string"
+    },
+    {
+      "key": "scheduling_url",
+      "value": "http://localhost:8084",
+      "type": "string"
+    },
+    {
+      "key": "history_url",
+      "value": "http://localhost:8083",
+      "type": "string"
+    },
+    {
+      "key": "notification_url",
+      "value": "http://localhost:8082",
+      "type": "string"
+    },
+    {
+      "key": "rabbitmq_url",
+      "value": "http://localhost:15672",
+      "type": "string"
+    },
+    {
+      "key": "rabbitmq_user",
+      "value": "notification",
+      "type": "string"
+    },
+    {
+      "key": "rabbitmq_password",
+      "value": "guest",
+      "type": "string"
+    },
+    {
+      "key": "paciente_id",
+      "value": "",
+      "type": "string",
+      "description": "Preencha manualmente com o valor retornado pelo servico. Nao presuma IDs iguais entre bancos."
+    },
+    {
+      "key": "profissional_id",
+      "value": "",
+      "type": "string",
+      "description": "Preencha manualmente com o valor retornado pelo servico. Nao presuma IDs iguais entre bancos."
+    },
+    {
+      "key": "test_password",
+      "value": "Postman@123",
+      "type": "string"
+    },
+    {
+      "key": "new_password",
+      "value": "Postman@456",
+      "type": "string"
+    },
+    {
+      "key": "consulta_id",
+      "value": "",
+      "type": "string",
+      "description": "Preencha manualmente com o valor retornado pelo servico. Nao presuma IDs iguais entre bancos."
+    },
+    {
+      "key": "consulta_data",
+      "value": "2030-01-15T10:00:00",
+      "type": "string",
+      "description": "Data de exemplo. Ajuste para uma data futura."
+    },
+    {
+      "key": "consulta_nova_data",
+      "value": "2030-01-16T11:00:00",
+      "type": "string",
+      "description": "Data de exemplo. Ajuste para uma data futura."
+    },
+    {
+      "key": "consulta_dia",
+      "value": "2030-01-15",
+      "type": "string",
+      "description": "Data de exemplo. Ajuste para uma data futura."
+    },
+    {
+      "key": "refresh_token",
+      "value": "",
+      "type": "string",
+      "description": "Preencha manualmente com o valor retornado pelo servico. Nao presuma IDs iguais entre bancos."
+    },
+    {
+      "key": "auth_medico_id",
+      "value": "",
+      "type": "string",
+      "description": "Preencha manualmente com o valor retornado pelo servico. Nao presuma IDs iguais entre bancos."
+    },
+    {
+      "key": "auth_paciente_id",
+      "value": "",
+      "type": "string",
+      "description": "Preencha manualmente com o valor retornado pelo servico. Nao presuma IDs iguais entre bancos."
+    },
+    {
+      "key": "auth_enfermeiro_id",
+      "value": "",
+      "type": "string",
+      "description": "Preencha manualmente com o valor retornado pelo servico. Nao presuma IDs iguais entre bancos."
+    },
+    {
+      "key": "auth_admin_token",
+      "value": "",
+      "type": "string",
+      "description": "Preencha manualmente com o valor retornado pelo servico. Nao presuma IDs iguais entre bancos."
+    },
+    {
+      "key": "auth_medico_token",
+      "value": "",
+      "type": "string",
+      "description": "Preencha manualmente com o valor retornado pelo servico. Nao presuma IDs iguais entre bancos."
+    },
+    {
+      "key": "auth_paciente_token",
+      "value": "",
+      "type": "string",
+      "description": "Preencha manualmente com o valor retornado pelo servico. Nao presuma IDs iguais entre bancos."
+    },
+    {
+      "key": "auth_enfermeiro_token",
+      "value": "",
+      "type": "string",
+      "description": "Preencha manualmente com o valor retornado pelo servico. Nao presuma IDs iguais entre bancos."
+    },
+    {
+      "key": "scheduling_admin_token",
+      "value": "",
+      "type": "string",
+      "description": "Preencha manualmente com o valor retornado pelo servico. Nao presuma IDs iguais entre bancos."
+    },
+    {
+      "key": "enfermeiro_id",
+      "value": "",
+      "type": "string",
+      "description": "Preencha manualmente com o valor retornado pelo servico. Nao presuma IDs iguais entre bancos."
+    },
+    {
+      "key": "auth_admin_id",
+      "value": "",
+      "type": "string",
+      "description": "Preencha manualmente com o valor retornado pelo servico. Nao presuma IDs iguais entre bancos."
+    },
+    {
+      "key": "email_admin",
+      "value": "admin@example.com",
+      "type": "string"
+    },
+    {
+      "key": "username_admin",
+      "value": "admin.exemplo",
+      "type": "string"
+    },
+    {
+      "key": "email_medico",
+      "value": "medico@example.com",
+      "type": "string"
+    },
+    {
+      "key": "username_medico",
+      "value": "medico.exemplo",
+      "type": "string"
+    },
+    {
+      "key": "email_paciente",
+      "value": "paciente@example.com",
+      "type": "string"
+    },
+    {
+      "key": "username_paciente",
+      "value": "paciente.exemplo",
+      "type": "string"
+    },
+    {
+      "key": "email_enfermeiro",
+      "value": "enfermeiro@example.com",
+      "type": "string"
+    },
+    {
+      "key": "username_enfermeiro",
+      "value": "enfermeiro.exemplo",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "01 - Auth e usuarios",
+      "description": "Envie as requisicoes individualmente, na ordem necessaria para o seu cenario.",
+      "item": [
+        {
+          "name": "Criar admin de teste",
+          "request": {
+            "method": "POST",
+            "url": "{{auth_url}}/api/users/v1",
+            "auth": {
+              "type": "noauth"
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"{{username_admin}}\",\n  \"email\": \"{{email_admin}}\",\n  \"password\": \"{{test_password}}\",\n  \"role\": \"ADMIN\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Login admin de teste",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{auth_url}}/api/auth/v1/login",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email_admin}}\",\n  \"password\": \"{{test_password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Criar medico",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{auth_url}}/api/users/v1",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"{{username_medico}}\",\n  \"email\": \"{{email_medico}}\",\n  \"password\": \"{{test_password}}\",\n  \"role\": \"MEDICO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Login medico",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{auth_url}}/api/auth/v1/login",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email_medico}}\",\n  \"password\": \"{{test_password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Criar paciente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{auth_url}}/api/users/v1",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"{{username_paciente}}\",\n  \"email\": \"{{email_paciente}}\",\n  \"password\": \"{{test_password}}\",\n  \"role\": \"PACIENTE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Login paciente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{auth_url}}/api/auth/v1/login",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email_paciente}}\",\n  \"password\": \"{{test_password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Renovar tokens",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{auth_url}}/api/auth/v1/refresh-token",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"refreshToken\": \"{{refresh_token}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Meu perfil",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{auth_url}}/api/users/v1/me",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_medico_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Listar usuarios",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{auth_url}}/api/users/v1",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_medico_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Buscar email",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{auth_url}}/api/users/v1?email={{email_paciente}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_medico_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Buscar userName",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{auth_url}}/api/users/v1?userName={{username_paciente}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_medico_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Atualizar perfil",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{auth_url}}/api/users/v1/{{auth_paciente_id}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_paciente_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"editado_exemplo\",\n  \"email\": \"{{email_paciente}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Paciente nao lista usuarios",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{auth_url}}/api/users/v1",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_paciente_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Medico nao altera role",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{auth_url}}/api/users/v1/{{auth_paciente_id}}/role",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_medico_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"role\": \"ENFERMEIRO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Email duplicado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{auth_url}}/api/users/v1",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"duplicado\",\n  \"email\": \"{{email_paciente}}\",\n  \"password\": \"{{test_password}}\",\n  \"role\": \"PACIENTE\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Cadastro invalido",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{auth_url}}/api/users/v1",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Senha incorreta",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{auth_url}}/api/auth/v1/login",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email_medico}}\",\n  \"password\": \"Errada@123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Perfil sem token",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{auth_url}}/api/users/v1/me",
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Alterar senha",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{auth_url}}/api/users/v1/{{auth_paciente_id}}/password",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_paciente_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"password\": \"{{new_password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Login nova senha",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{auth_url}}/api/auth/v1/login",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email_paciente}}\",\n  \"password\": \"{{new_password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Criar enfermeiro",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{auth_url}}/api/users/v1",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userName\": \"{{username_enfermeiro}}\",\n  \"email\": \"{{email_enfermeiro}}\",\n  \"password\": \"{{test_password}}\",\n  \"role\": \"ENFERMEIRO\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Login enfermeiro",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{auth_url}}/api/auth/v1/login",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"{{email_enfermeiro}}\",\n  \"password\": \"{{test_password}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        }
+      ]
+    },
+    {
+      "name": "02 - Cadastro no scheduling",
+      "description": "Envie as requisicoes individualmente, na ordem necessaria para o seu cenario.",
+      "item": [
+        {
+          "name": "Paciente sem cadastro",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{scheduling_url}}/api/v1/consultas",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_paciente_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Completar cadastro medico",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{scheduling_url}}/api/v1/cadastro/me",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_medico_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"medico Postman\",\n  \"emailContato\": \"{{email_medico}}\",\n  \"telefone\": \"11999999999\",\n  \"especialidade\": \"Clinica geral\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Ler cadastro medico",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{scheduling_url}}/api/v1/cadastro/me",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_medico_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Completar cadastro enfermeiro",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{scheduling_url}}/api/v1/cadastro/me",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_enfermeiro_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"enfermeiro Postman\",\n  \"emailContato\": \"{{email_enfermeiro}}\",\n  \"telefone\": \"11999999999\",\n  \"especialidade\": \"Clinica geral\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Ler cadastro enfermeiro",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{scheduling_url}}/api/v1/cadastro/me",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_enfermeiro_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Completar cadastro paciente",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{scheduling_url}}/api/v1/cadastro/me",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_paciente_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"paciente Postman\",\n  \"emailContato\": \"{{email_paciente}}\",\n  \"telefone\": \"11999999999\",\n  \"especialidade\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Ler cadastro paciente",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{scheduling_url}}/api/v1/cadastro/me",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_paciente_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Repetir cadastro preserva ID",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{scheduling_url}}/api/v1/cadastro/me",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_paciente_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"paciente Postman\",\n  \"emailContato\": \"{{email_paciente}}\",\n  \"telefone\": \"11999999999\",\n  \"especialidade\": null\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Refresh token nao acessa scheduling",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{scheduling_url}}/api/v1/cadastro/me",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{refresh_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        }
+      ]
+    },
+    {
+      "name": "03 - Consultas REST",
+      "description": "Envie as requisicoes individualmente, na ordem necessaria para o seu cenario.",
+      "item": [
+        {
+          "name": "Saude",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{scheduling_url}}/actuator/health",
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Informacoes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{scheduling_url}}/actuator/info",
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Disponibilidade",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{scheduling_url}}/api/v1/disponibilidade?profissionalId={{profissional_id}}&data={{consulta_dia}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_medico_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Criar consulta e notificar",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{scheduling_url}}/api/v1/consultas",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_medico_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pacienteId\": \"{{paciente_id}}\",\n  \"profissionalId\": \"{{profissional_id}}\",\n  \"dataConsulta\": \"{{consulta_data}}\",\n  \"tipo\": \"PRESENCIAL\",\n  \"observacoes\": \"Postman exemplo\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Horario duplicado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{scheduling_url}}/api/v1/consultas",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_medico_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pacienteId\": \"{{paciente_id}}\",\n  \"profissionalId\": \"{{profissional_id}}\",\n  \"dataConsulta\": \"{{consulta_data}}\",\n  \"tipo\": \"PRESENCIAL\",\n  \"observacoes\": \"Postman exemplo\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Paciente nao cria",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{scheduling_url}}/api/v1/consultas",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_paciente_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pacienteId\": \"{{paciente_id}}\",\n  \"profissionalId\": \"{{profissional_id}}\",\n  \"dataConsulta\": \"{{consulta_data}}\",\n  \"tipo\": \"PRESENCIAL\",\n  \"observacoes\": \"Postman exemplo\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Dados ausentes",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{scheduling_url}}/api/v1/consultas",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_medico_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Data passada",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{scheduling_url}}/api/v1/consultas",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_medico_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"pacienteId\": \"{{paciente_id}}\",\n  \"profissionalId\": \"{{profissional_id}}\",\n  \"dataConsulta\": \"2000-01-01T10:00:00\",\n  \"tipo\": \"PRESENCIAL\",\n  \"observacoes\": \"Postman exemplo\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Buscar consulta",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{scheduling_url}}/api/v1/consultas/{{consulta_id}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_medico_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Consulta inexistente",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{scheduling_url}}/api/v1/consultas/9223372036854775807",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_medico_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Enfermeiro lista consultas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{scheduling_url}}/api/v1/consultas",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_enfermeiro_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Filtrar consultas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{scheduling_url}}/api/v1/consultas?pacienteId={{paciente_id}}&profissionalId={{profissional_id}}&status=AGENDADA&data={{consulta_dia}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_medico_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Paciente lista suas consultas",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{scheduling_url}}/api/v1/consultas",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_paciente_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Paciente busca sua consulta",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{scheduling_url}}/api/v1/consultas/{{consulta_id}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_paciente_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Editar e notificar",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{scheduling_url}}/api/v1/consultas/{{consulta_id}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_enfermeiro_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"dataConsulta\": \"{{consulta_nova_data}}\",\n  \"tipo\": \"TELEMEDICINA\",\n  \"status\": \"CONFIRMADA\",\n  \"observacoes\": \"Editada pelo Postman\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        }
+      ]
+    },
+    {
+      "name": "04 - Scheduling GraphQL",
+      "description": "Envie as requisicoes individualmente, na ordem necessaria para o seu cenario.",
+      "item": [
+        {
+          "name": "Historico filtrado",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{scheduling_url}}/graphql",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_medico_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query($filtro: ConsultaFiltroInput) { historicoConsultas(filtro: $filtro) { id pacienteId profissionalId dataSolicitacao dataConsulta tipo status observacoes createdAt updatedAt } }\",\n  \"variables\": {\n    \"filtro\": {\n      \"pacienteId\": \"{{paciente_id}}\",\n      \"profissionalId\": \"{{profissional_id}}\",\n      \"status\": \"CONFIRMADA\"\n    }\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Consulta por ID",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{scheduling_url}}/graphql",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_medico_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query($id: ID!) { consulta(id: $id) { id pacienteId profissionalId dataSolicitacao dataConsulta tipo status observacoes createdAt updatedAt } }\",\n  \"variables\": {\n    \"id\": \"{{consulta_id}}\"\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Historico do paciente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{scheduling_url}}/graphql",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_paciente_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"{ historicoConsultas { id pacienteId profissionalId dataSolicitacao dataConsulta tipo status observacoes createdAt updatedAt } }\",\n  \"variables\": {}\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        }
+      ]
+    },
+    {
+      "name": "05 - History GraphQL",
+      "description": "Envie as requisicoes individualmente, na ordem necessaria para o seu cenario.",
+      "item": [
+        {
+          "name": "Consultar historico apos CONFIRMADA",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{history_url}}/graphql",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query($patientId: ID!, $futureOnly: Boolean!) { appointmentHistory(patientId: $patientId, futureOnly: $futureOnly) { appointmentId patientId doctorId scheduledAt status } }\",\n  \"variables\": {\n    \"patientId\": \"{{paciente_id}}\",\n    \"futureOnly\": false\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Historico futuro",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{history_url}}/graphql",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query($patientId: ID!, $futureOnly: Boolean!) { appointmentHistory(patientId: $patientId, futureOnly: $futureOnly) { appointmentId patientId doctorId scheduledAt status } }\",\n  \"variables\": {\n    \"patientId\": \"{{paciente_id}}\",\n    \"futureOnly\": true\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        }
+      ]
+    },
+    {
+      "name": "06 - Notification e RabbitMQ",
+      "description": "Envie as requisicoes individualmente, na ordem necessaria para o seu cenario.",
+      "item": [
+        {
+          "name": "Ping notification",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{notification_url}}/ping",
+            "auth": {
+              "type": "noauth"
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Inspecionar email_queue",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{rabbitmq_url}}/api/queues/%2F/email_queue",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{rabbitmq_user}}",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{rabbitmq_password}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Inspecionar dlq_queue",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{rabbitmq_url}}/api/queues/%2F/dlq_queue",
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "username",
+                  "value": "{{rabbitmq_user}}",
+                  "type": "string"
+                },
+                {
+                  "key": "password",
+                  "value": "{{rabbitmq_password}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        }
+      ]
+    },
+    {
+      "name": "07 - Cancelamento e exclusao MANUAIS",
+      "description": "Envie as requisicoes individualmente, na ordem necessaria para o seu cenario.",
+      "item": [
+        {
+          "name": "Paciente nao cancela",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{scheduling_url}}/api/v1/consultas/{{consulta_id}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_paciente_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Cancelar consulta criada",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{scheduling_url}}/api/v1/consultas/{{consulta_id}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_medico_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Confirmar cancelamento",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{scheduling_url}}/api/v1/consultas/{{consulta_id}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_medico_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Consultar historico apos CANCELADA",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{history_url}}/graphql",
+            "auth": {
+              "type": "noauth"
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"query\": \"query($patientId: ID!, $futureOnly: Boolean!) { appointmentHistory(patientId: $patientId, futureOnly: $futureOnly) { appointmentId patientId doctorId scheduledAt status } }\",\n  \"variables\": {\n    \"patientId\": \"{{paciente_id}}\",\n    \"futureOnly\": false\n  }\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Nao editar cancelada",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "url": "{{scheduling_url}}/api/v1/consultas/{{consulta_id}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_medico_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"observacoes\": \"Nao deve atualizar\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Admin altera perfil da conta temporaria",
+          "request": {
+            "method": "PATCH",
+            "url": "{{auth_url}}/api/users/v1/{{auth_paciente_id}}/role",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"role\":\"ENFERMEIRO\"}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Excluir de teste paciente",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{auth_url}}/api/users/v1/{{auth_paciente_id}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Excluir de teste medico",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{auth_url}}/api/users/v1/{{auth_medico_id}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Excluir de teste enfermeiro",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{auth_url}}/api/users/v1/{{auth_enfermeiro_id}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        },
+        {
+          "name": "Excluir de teste admin",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{auth_url}}/api/users/v1/{{auth_admin_id}}",
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "description": "Template manual. Revise corpo, parametros e autorizacao antes de enviar. IDs do auth e do scheduling sao independentes."
+          }
+        }
+      ]
+    }
+  ]
+}
